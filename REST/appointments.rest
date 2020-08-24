@@ -1,0 +1,42 @@
+GET http://localhost:3000/appointments
+
+###
+
+GET http://localhost:3000/appointments/5f1f3ba7242537235cab3dcb
+###
+
+POST http://localhost:3000/appointments/add-appointment
+Content-Type: application/json
+
+    {    "patientID" : "5f1e1f242d1f0e2928d88667",
+        "patientName": "SK",
+        "department": "Cardio",
+        "doctor": "SK",
+        "appointmentDate" : "\"2019-02-08T23:28:56.782Z\"",
+        "appointmentTime" : "\"2014-01-20T23:28:56.782Z\"",
+        "message": "Blah.....",
+        "status": "active"
+    }
+
+###
+PATCH  http://localhost:3000/appointments/5f1f3ba7242537235cab3dcb
+Content-Type: application/json
+
+    {   
+         "patientID" : "5f1e1f242d1f0e2928d88667",
+        "patientName": "SK1 ",
+        "department": "Cardio",
+        "doctor": "Shams",
+        "appointmentDate" : "\"2018-02-08T23:28:56.782Z\"",
+        "appointmentTime" : "\"2018-02-08T11:22:56.782Z\"",
+         "message": "Blah.....",
+        "status": "active"
+    }
+
+###
+
+DELETE http://localhost:3000/appointments
+
+###
+
+DELETE http://localhost:3000/appointments/5f1e409518e3331bf0a4ada7

@@ -1,0 +1,48 @@
+GET http://localhost:3000/doctors
+
+###
+
+GET http://localhost:3000/doctors/profile/5f1de68412de800d4490b77c
+
+###
+
+POST http://localhost:3000/doctors/add-doctor
+Content-Type: application/json
+
+    {   "firstName" : "Steva",
+         "lastName" : "Shawn",
+         "username" : "sk001", 
+         "email" : "sk01@gmail.com" ,
+         "password" : "pass123",         
+         "gender": "male",
+          "department": "Cardiology",
+         "availableDays" : "Monday, Tuesday, Thursday",
+         "availableTime" : "10AM-1PM",
+          "DOB": "\"2014-01-01T23:28:56.782Z\"",
+          "joiningDate": "\"2020-01-01T23:28:56.782Z\"",
+         "address" : "H #112, jsdnsdnjs, Hyd",
+         "country" : "Pakistan",
+         "city": "Hyd",
+         "postalCode" : "71000",
+         "phone" : "0900-78601",
+         "img" : "assets/img/doctor-01.jpg",
+         "details" : "Heart Specialist ...  ",
+         "status" : "active"
+        
+        } 
+###
+
+DELETE http://localhost:3000/doctors
+
+###
+
+DELETE http://localhost:3000/doctors/5f1e0ce9f6a58c1d7c768102
+
+###
+
+PATCH http://localhost:3000/doctors/5f3b6c0a6df2b4107c9b1935
+Content-Type: application/json
+
+ {       "firstName" : "Steve",
+         "lastName" : "Shawn"
+}

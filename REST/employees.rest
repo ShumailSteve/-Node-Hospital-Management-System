@@ -1,0 +1,71 @@
+GET http://localhost:3000/employees
+
+###
+
+GET http://localhost:3000/employees/5f21df125b807a130039a853
+
+###
+
+POST  http://localhost:3000/employees/employee
+Content-Type: application/json
+
+{
+  "email" : "doc1@gmail.com",
+  "pass": "doc123"
+}
+
+###
+
+POST  http://localhost:3000/employees/add-employee
+Content-Type: application/json
+
+{
+   "firstName" : "Doctor ",
+    "lastName" : "New",
+    "username" : "Doc3", 
+    "email" : "doc3@gmail.com",
+    "password" : "doc123",
+    "password2" : "doc123",
+    "age" : 30,
+     "gender" : "male",
+      "joiningDate": "\"2020-01-01T23:28:56.782Z\"",
+    "dutyDays" : "Mon, Tues, Wed, Thurs, Fri",
+    "dutyTime" : "8 AM - 2 PM", 
+    "address" : "H # 119, Jasnsjasj, Hyderabad Sindh", 
+    "phone" : "090-78601",
+    "educationDetails" : "Dipoma in Nursing",
+    "role" : "Nurse",
+     "status" : "active" 
+}
+
+###
+
+PATCH   http://localhost:3000/employees/5f21e20f7c5fdc06cc3c60e4
+Content-Type: application/json
+
+{   
+   "firstName" : "Doctor1 ",
+    "lastName" : "New",
+    "username" : "Doc1", 
+    "email" : "doc4@gmail.com",
+    "password" : "doc123",
+    "password2" : "doc12",
+    "age" : 30,
+     "gender" : "male",
+      "joiningDate": "\"2019-01-01T23:28:56.782Z\"",
+    "dutyDays" : "Mon, Tues, Wed, Thurs, Fri",
+    "dutyTime" : "8 AM - 2 PM", 
+    "address" : "H # 119, Jasnsjasj, Hyderabad Sindh", 
+    "phone" : "090-78601",
+    "educationDetails" : "Dipoma in Nursing",
+    "role" : "Nurse",
+     "status" : "active" 
+}
+
+###
+DELETE http://localhost:3000/employees/5f21df125b807a130039a853
+
+### 
+DELETE http://localhost:3000/employees
+
+

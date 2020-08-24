@@ -1,0 +1,35 @@
+GET http://localhost:3000/departments
+
+###
+GET http://localhost:3000/departments/5f1f441eee99ad3a5479fcca
+
+###
+
+POST http://localhost:3000/departments/add-department
+Content-Type: application/json
+
+{
+    
+    "name": "Neurology",
+    "Description": "BEST Brain",
+    "status": "active"
+}
+
+###
+
+PATCH http://localhost:3000/departments/5f1f441eee99ad3a5479fcca
+Content-Type: application/json
+
+{
+    "name": "Liver",
+    "description": "BEST Liver",
+    "status": "active"
+}
+
+###
+
+DELETE http://localhost:3000/departments/
+
+###
+DELETE http://localhost:3000/departments/5f1f69c68154c53bccbf898c
+
