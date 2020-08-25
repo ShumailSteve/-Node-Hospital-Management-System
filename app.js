@@ -104,7 +104,7 @@ app.get('/error-500', (req, res) => {
     res.render('error-500');
 });
 
-app.get('/*', (req, res) => {
+app.get('*', (req, res) => {
     res.render('error-404');
 });
 

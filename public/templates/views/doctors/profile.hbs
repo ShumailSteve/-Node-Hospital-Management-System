@@ -1,34 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-<!-- profile22:59-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <link rel="shortcut icon" type="image/x-icon" href="ssets/img/favicon.ico">
-    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+    <title>Profile</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
-    <!--[if lt IE 9]>
-		<script src="assets/js/html5shiv.min.js"></script>
-		<script src="assets/js/respond.min.js"></script>
-	<![endif]-->
+
 </head>
 
 <body>
     <div class="main-wrapper">
  {{>header}}
         <div class="page-wrapper">
+             
             <div class="content">
+               
                 <div class="row">
+                    {{>messages}}
                     <div class="col-sm-7 col-6">
                         <h4 class="page-title">My Profile</h4>
                    </div>
 
                     <div class="col-sm-5 col-6 text-right m-b-30">
-                        <a href="/edit-profile" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit Profile</a>
+                        <a href="/doctors/edit-doctor/{{doc._id}}" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit Profile</a>
                     </div>
                 </div>
                   
@@ -39,7 +36,7 @@
                             <div class="profile-view">
                                 <div class="profile-img-wrap">
                                     <div class="profile-img">
-                                        <a href="#"><img class="avatar" alt="Loading..." src="data:image;base64,{{doc.img}}" ></a>
+                                        <a href="#"><img class="avatar" alt="" src="data:image;base64,{{doc.img}}" ></a>
                                     </div>
                                 </div>
                                 <div class="profile-basic">
@@ -118,6 +115,4 @@
     <script src="/assets/js/app.js"></script>
 </body>
 
-
-<!-- profile23:03-->
 </html>
