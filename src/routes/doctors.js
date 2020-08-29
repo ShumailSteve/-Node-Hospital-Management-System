@@ -16,7 +16,6 @@ router.use( function( req, res, next ) {
     }       
     next(); 
 });
-
 // Set Storage for Image
 var storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -24,10 +23,17 @@ var storage = multer.diskStorage({
         },
         filename: function (req, file, cb) {
             cb(null,  'Doctor-' + Date.now() + '.jpg' );
-        }
+        },
 });
 
-var upload = multer({storage: storage});
+const imageMimeType = ['image/jpeg', 'image/png','image/gif'];
+var upload = multer(
+                 {storage: storage,
+                  fileFilter: (req, file, cb) => {
+                        cb(null, imageMimeType.includes(file.mimetype))
+                    }
+                 }
+            );
 
 // Get Add Doctor Page
 router.get('/add-doctor', (req, res) => {
@@ -36,8 +42,17 @@ router.get('/add-doctor', (req, res) => {
 
  // Edit Doctor by ID
  router.get('/edit-doctor/:id', async (req, res) => {
-     const doc = await doctor.findById(req.params.id);   
-     res.render('doctors/edit-doctor', {doc});
+     try{
+            const doc = await doctor.findById(req.params.id);
+            // If no doctor exists
+            if(!doc) {
+                return res.redirect('/doctors');                
+            }   
+            res.render('doctors/edit-doctor', {doc});
+     } catch {
+            // Internal Server Error
+            res.render('error-500');
+        }   
 });
 
 //Get all Doctors 
@@ -45,6 +60,7 @@ router.get('', async (req, res) => {
         try{
             const doctors = await doctor.find({});
             const len = doctors.length;
+ 
             // If no doctors
             if (!len) {                   
                     return res.render('doctors/doctors', {info_msg: "No doctors available"});                   
@@ -60,88 +76,75 @@ router.get('', async (req, res) => {
 router.get('/profile/:id', async (req, res) => {
             try {
                 const doc = await doctor.findById(req.params.id);
-              // Not Found
-              if (!doc) {                 
-                return res.status(404).render('error-404');
-            }
-            //    res.send(doc);
-            res.render('doctors/profile', {doc, success_msg: req.flash('msg')});
-            } catch (e) {
-                // Internal Server Error
+                // If no doctor with given id
+                if(!doc)  return res.status(400).render('error-404');
+                res.render('doctors/profile', {doc, success_msg: req.flash('msg')});
+            } catch {
+                //Internal Server Error
                 res.status(400).render('error-500');
             } 
 });
 
 // Add Doctor
 router.post('/add-doctor', upload.single('img'), async (req, res) => {
-    try{
-         let errors = [];
-         const {firstName, lastName, email, department, DOB, gender, address, city, phone, joiningDate, educationDetails, status } = req.body;
-        // If any required field is missing
-        if(!firstName || !email || !DOB || !address || !city || !phone){
-            errors.push({msg: 'Please Fill all required fields'});   
-            // Send entered data back to client   
-            res.render('doctors/add-doctor', {
-                errors,
-                firstName, lastName, email, department, DOB, gender, address, city, phone, joiningDate, educationDetails, status
+              // Assign Image to img and Delete
+            const img = assignAndRemoveImage(req.file);
+            const doc = await doctor.find({});
+            // For Generating Auto-incremental id
+            const len = doc.length+1;
+            
+            let newDoctor = new doctor({
+                id: len,
+                firstName: req.body.firstName,
+                lastName : req.body.lastName,
+                email : req.body.email,
+                department: req.body.department, 
+                DOB: req.body.DOB, 
+                gender: req.body.gender, 
+                address: req.body.address, 
+                city: req.body.city, 
+                phone: req.body.phone, 
+                joiningDate: req.body.joiningDate, 
+                educationDetails: req.body.educationDetails, 
+                img: img,
+                status: req.body.status
             });
-              // Delete File from img Folder
-            if(req.file) {
-                fs.unlink(req.file.path, (e) => {
-                    if (e)  return console.log(e);
-                console.log("File Deleted");
-                } );          
-            }   
-           
-            return;
-        }
-         // Check if doctor with given Email already exists
-        const docEmail = await doctor.find({email});
-        // If yes 
-        if(docEmail.length != 0){
-            errors.push({msg: 'Email already exists'});
-            res.render('doctors/add-doctor', {
-                errors,
-                firstName, lastName, email, department, DOB, gender, address, city, phone, joiningDate, educationDetails, status
-            });
-            if(req.file) {
-                fs.unlink(req.file.path, (e) => {
-                    if (e)  return console.log(e);
-                console.log("File Deleted");
-                } );          
-            }   
-            return;
-        }
-           let img;
-        // If picture has been uploaded
-        if(req.file){
-            const f = fs.readFileSync(req.file.path, 'base64');
-
-            img = f;
-            // Delete File from img Folder
-            fs.unlink(req.file.path, (e) => {
-                if (e)  return console.log(e);
-            console.log("File Deleted");
-            })       
-         }
-    
-        const doc = await doctor.find({});
-        // For Generating Auto-incremental id
-        const len = doc.length+1;
-        const newDoctor = new doctor({id: len, firstName, lastName, email, department, DOB, gender, address, city, phone, joiningDate,  img, educationDetails, status });
-        await newDoctor.save();
-        req.flash('msg', 'New Doctor added, kindly add schedule');
-        res.redirect(`/doctors/add-schedule/${newDoctor._id}`);
-       
-        }
-        catch (e) {
-            // Internal Server Error
+            let errors = [];
+            // If any required field is missing
+            if(!newDoctor.firstName || !newDoctor.email ||  !newDoctor.department ||!newDoctor.DOB ||!newDoctor.gender || !newDoctor.address || !newDoctor.city || !newDoctor.phone || !newDoctor.status){
+                errors.push({msg: 'Please Fill all required fields'});   
+                // Send entered data back to client   
+                res.render('doctors/add-doctor', {
+                    errors,
+                    doc: newDoctor
+                });
+                return;
+            }
+        try{ 
+            await newDoctor.save();
+            req.flash('msg', 'New Doctor added, kindly add schedule');
+            res.redirect(`/doctors/add-schedule/${newDoctor._id}`);
+         }  catch (e) {
+                console.log(e);
+          // If Email Already Exists
+                if(e.keyPattern.email){
+                            errors.push({msg: 'Email already exists'});
+                                res.render('doctors/add-doctor', {
+                                errors,
+                                doc: newDoctor
+                            });
+                return;
+                }
+            //  Internal Server Error
             res.status(500).render('error-500');
        }
  });
 
  // Edit Doctor
 router.patch('/:id', upload.single('img') , async (req, res) => {
+              // Assign Image to img and Delete
+              const img = assignAndRemoveImage(req.file);
+
             //Obj Destructuring
             const {firstName, lastName, email, department, DOB, gender, address, city, phone, joiningDate, educationDetails, status } = req.body;
 
@@ -157,25 +160,9 @@ router.patch('/:id', upload.single('img') , async (req, res) => {
             
             // If any invalid update exists return error                        
             if (!isValidOperation) {
-                   // Delete File from img Folder
-                   fs.unlink(req.file.path, (e) => {
-                    if (e)  return console.log(e);
-                    console.log("File Deleted");
-                })    
                 return res.render('error-404');
             }
-              let img;
-            // If picture has been uploaded
-            if(req.file){
-                const f = fs.readFileSync(req.file.path, 'base64');
-               
-                img = f;
-                // Delete File from img Folder
-                fs.unlink(req.file.path, (e) => {
-                    if (e)  return console.log(e);
-                console.log("File Deleted");
-                })       
-            }  
+            
           try{                       
             const doc =  await doctor.findById(req.params.id);
                // Not Found
@@ -343,5 +330,17 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                 res.render('error-500');
             }        
 });
+
+function assignAndRemoveImage (file) {
+    if(file){
+        const f = fs.readFileSync(file.path, 'base64');
+        // Delete File from img Folder
+        fs.unlink(path.join('', file.path), (e) => {
+            if (e)  return console.log(e);
+        console.log("File Deleted");
+        }); 
+    return f;      
+    }
+}
 
 module.exports = router;

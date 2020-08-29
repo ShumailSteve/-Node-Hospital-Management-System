@@ -2,21 +2,22 @@ const mongoose = require('mongoose');
 
 
 var doctorSchema = mongoose.Schema({
-    id : {type: Number},
+    id : {type: Number, required: true},
     firstName: {type: String, required: true, trim: true},
     lastName: {type: String, trim: true},
     email: {type: String, unique: true, required: true, lowercase: true, trim: true},
-    department: {type: String, trim: true},
+    department: {type: String, trim: true, required: true},
     DOB: {type: String, required: true},
       // Add 'enum' of an array of options to force selection between a given number of options.
     gender: {
       type: String,
+      required: true, 
       enum: ["male", "female"] 
    },
-   address: {type: String},
+   address: {type: String, required: true},
   //  country: { type: String },
-   city: {type: String},
-   phone: {type: String, trim: true},
+   city: {type: String, required: true},
+   phone: {type: String, required: true, trim: true},
    availableDays: {type: String},
    availableFrom: {type: String},  
    availableTill: {type: String}, 
@@ -25,6 +26,7 @@ var doctorSchema = mongoose.Schema({
    img: {type: Buffer},
    status: {
         type: String,
+        required: true,
         enum: ["active", "inactive"] 
      }
    },  {timestamps: true});
