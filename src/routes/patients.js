@@ -3,10 +3,20 @@ const express = require('express');
 const router = new express.Router();
 const patient = require('../models/patients');
 
-
-// Get all Patients
-router.get('', (req, res) => {
-    res.render('patients/patients');
+//Get all patients
+router.get('', async (req, res) => {
+    try{
+        const patients = await patient.find();
+        const len = patients.length;
+         // If no patients 
+        if (!len) {                   
+              return res.render('patients/patients', {info_msg: "No patients available"});                   
+        }
+    res.render('patients/patients', {patients, success_msg: req.flash('msg')});            
+    } catch (e) {
+        // Internal Server Error
+        res.status(500).render('error-500');
+    }
 });
 
 //ADD Patients Page
@@ -14,74 +24,63 @@ router.get('/add-patient', (req, res) => {
     res.render('patients/add-patient');
 });
 
+
+// Add patient
+router.post('/add-patient', async (req, res) => {    
+    //Object Destructing 
+   const {firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, email, status } = req.body;
+   const Patients = await patient.find({});
+   // For Generating Auto-incremental id
+   const len = Patients.length+1;   
+
+   const newPatient = new patient({id: len, firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, email, status });
+
+   let errors = [];
+   if(!firstName || !gender || !status)
+   {
+           errors.push({msg: "Please fill all required Fields"});
+           return res.render('patients/add-patient', {errors, newPatient})
+   }
+try{       
+   console.log("try"); 
+   await newPatient.save();   
+   req.flash('msg', `Patient (${firstName} ${lastName}) added successfully`);
+   res.redirect('/patients');
+   //  // status 201 = Created
+   // res.status(201).send('Account Created');    
+   console.log("DONE");
+   }
+   catch (e) {
+       // Iternal Server Error
+       res.status(500).send(e);
+}
+});
+
+
+
  // Get Edit Patient Page
  router.get('/edit-patient', (req, res) => {
     res.render('patients/edit-patient');
 });
 
-// Add patient
-router.post('/add-patient', async (req, res) => {
-    try{
-         // Object Destructing 
-         const {firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, img, status } = req.body;
-            let errors;
-         if(!firstName || !gender || !phone || !status)
-            {
-                    errors.push("msg", "Please fill all required Fields");
-                    return res.render('/')
-            }
-              
-        const Patients = await patient.find({});
-        // For Generating Auto-incremental id
-        const len = Patients.length+1;
-       
-      
-        const newPatient = new patient({id: len, firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, img, status });
-          
-            await newPatient.save();      
-            // status 201 = Created
-            res.status(201).send('Account Created');    
-        }
-        catch (e) {
-            // Iternal Server Error
-            res.status(500).send(e);
-       }
- });
 
 
 
-//Get all patients
-router.get('', async (req, res) => {
-   
-      try{
-        const patients = await patient.find();
-         const len = patients.length;
-         if (!len) {
-                   return res.status(404).send();
-         }
-            // status 200 = successful
-        res.status(200).send({patients, len});
-      } catch (e) {
-        // Internal Server Error
-        res.status(500).send(e);
-      }
-});
-
-// Get Single Patient by ID
-router.get('/profile/:id', async (req, res) => {
-    try {
-        const Patient = await patient.findById(req.params.id);
-        if (!Patient)  {
-                //status 404 = Not Found
-            return res.status(404).send();
-        }
-       res.send(Patient);
-    } catch (e) {
-        // Bad Request
-        res.status(400).send(e);
-    }
-    
-});
+// // Get Single Patient by ID
+// router.get('/profile/:id', async (req, res) => {
+//   try {
+//       const Patient = await patient.findById(req.params.id);
+//       if (!Patient)  {
+//               //status 404 = Not Found
+//           return res.status(404).send();
+//       }
+//      res.send(Patient);
+//   } catch (e) {
+//       // Bad Request
+//       res.status(400).send(e);
+//   }
+  
+// });
 
 
 

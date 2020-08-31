@@ -12,14 +12,12 @@ var patientSchema = mongoose.Schema({
             },
     disease : {type: String, trim: true },
     bloodGroup: {type: String},
-     address:   {type: String},
-     
-     city:      {type: String},
-    
-     phone:     {type: String},
-     img:       {type: String},
-     admitDate : { type: Date, default: Date.now},
-     status: {
+    address:   {type: String},     
+    city:      {type: String},    
+    phone:     {type: String},
+    email: {type: String},
+    admitDate : { type: Date, default: Date.now},
+    status: {
         type: String,
         enum: ["active", "inactive"] 
      }

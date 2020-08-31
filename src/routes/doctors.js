@@ -251,7 +251,7 @@ router.get('/schedules', async (req, res) => {
             if(docs.length == 0){
                     return res.render('doctors/schedules', {info_msg: "No doctors available currently"});
             }
-            res.render('doctors/schedules', {docs});
+            res.render('doctors/schedules', {docs, success_msg: req.flash('msg')});
         } catch (e) {
             // Internal Server Error
             res.status(500).render('error-500');
@@ -286,7 +286,7 @@ router.post('/add-schedule/:id', async (req, res) => {
                 doc.availableTill = req.body.availableTill;
                 await doc.save();
                 req.flash('msg', 'Schedule added successfully');
-                res.redirect(`/doctors/profile/${doc._id}`);
+                res.redirect(`/doctors/add-salary/${doc._id}`);
             } catch (e) {
                     res.render('error-500');
             }  
@@ -324,11 +324,113 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                 doc.availableTill = req.body.availableTill;
                 await doc.save();
                 req.flash('msg', 'Schedule Updated Successfully');
-                res.redirect(`/doctors/profile/${doc._id}`);
+                res.redirect(`/doctors/schedules`);
             } catch (e) {
                 // Internal Server Error
                 res.render('error-500');
             }        
+});
+
+//SALARY
+
+// Doctors Salary List
+router.get('/salary', async (req, res) => {
+    // Get all doctors
+    try {
+        const docs = await doctor.find({});
+      // If no doctors 
+        if(docs.length == 0){
+                return res.render('doctors/salary', {info_msg: "No doctors available currently"});
+        }
+        res.render('doctors/salary', {docs, success_msg: req.flash('msg')});
+    } catch (e) {
+        // Internal Server Error
+        res.status(500).render('error-500');
+   }  
+});
+
+// Add Salary by Doc _id
+router.get('/add-salary/:id', async(req, res) => {
+        try{
+            const doc = await doctor.findById(req.params.id);
+            var name = doc.lastName + ',' + doc.firstName;
+            res.render('doctors/add-salary', {id: doc._id, name, success_msg: req.flash('msg')} );
+        }catch {
+            // Not Found
+            res.render('error-404');
+        }    
+});
+
+// Add Salary of Doc 
+router.post('/add-salary/:id', async (req, res) => {
+        const {basicSalary, accommodation, conveyance, otherExpenses} = req.body;
+       // If basic Salray is not entered
+        if (basicSalary === '') {
+                    req.flash('msg', 'Please Enter Basic Salary')
+                    res.redirect(`/doctors/add-salary/${req.params.id}`);
+                    return;
+        }
+        try{
+            const doc = await doctor.findById(req.params.id);
+           // If not Found
+            if(!doc) {
+                return res.render('error-404');
+            }
+            doc.basicSalary = parseInt(basicSalary);
+            doc.accommodation = parseInt(accommodation);
+            doc.conveyance = parseInt(conveyance);
+            doc.otherExpenses = parseInt(otherExpenses);
+            doc.totalSalary = parseInt(doc.basicSalary + doc.accommodation + doc.conveyance + doc.otherExpenses);
+            await doc.save();
+            req.flash('msg', `Salary of Doctor ${doc.firstName} ${doc.lastName} added successfully`);
+            res.redirect('/doctors/salary');
+        } catch {
+                res.render('error-500');
+        }  
+});
+
+// Get Edit Salary by ID
+router.get('/edit-salary/:id', async (req, res) => {
+        try{
+            // Get doctor by ID
+            const doc = await doctor.findById(req.params.id);
+            // If not Found
+            if(!doc) {
+                return res.render('error-404');
+            }                
+            const {firstName, lastName, basicSalary, accommodation, conveyance, otherExpenses} = doc;
+            var name = doc.lastName + ',' + doc.firstName;
+            res.render('doctors/edit-salary', {id: req.params.id, name, basicSalary, accommodation, conveyance, otherExpenses});
+        } catch (e) {
+            // Internal Server Error
+            res.render('error-500');
+        }            
+});
+
+// Edit Schedule
+router.patch('/edit-salary/:id', async (req, res) => {
+        try{
+             // Get doctor by ID
+             const doc = await doctor.findById(req.params.id);
+
+             // If not Found
+             if(!doc) {
+                 return res.render('error-404');
+             } 
+             //Update  
+             doc.basicSalary = parseInt(req.body.basicSalary);
+             doc.accommodation = parseInt(req.body.accommodation);
+             doc.conveyance = parseInt(req.body.conveyance);
+             doc.otherExpenses = parseInt(req.body.otherExpenses);
+             doc.totalSalary = parseInt(doc.basicSalary + doc.accommodation + doc.conveyance + doc.otherExpenses);
+             // save updates 
+             await doc.save();
+             req.flash('msg', `Salary of Doctor ${doc.firstName} ${doc.lastName} Edited successfully`);
+             res.redirect('/doctors/salary');
+        } catch (e) {
+            // Internal Server Error
+            res.render('error-500');
+        }        
 });
 
 function assignAndRemoveImage (file) {
@@ -342,5 +444,9 @@ function assignAndRemoveImage (file) {
     return f;      
     }
 }
+
+
+
+
 
 module.exports = router;

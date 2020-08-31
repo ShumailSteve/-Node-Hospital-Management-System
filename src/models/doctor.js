@@ -28,7 +28,13 @@ var doctorSchema = mongoose.Schema({
         type: String,
         required: true,
         enum: ["active", "inactive"] 
-     }
-   },  {timestamps: true});
+     },
+    basicSalary: {type: Number},
+    accommodation : {type: Number},
+    conveyance: {type: Number},
+    otherExpenses: {type: Number},
+    totalSalary: {type: Number}
+  },
+  {timestamps: true});
 
 module.exports = mongoose.model('doctor', doctorSchema);
