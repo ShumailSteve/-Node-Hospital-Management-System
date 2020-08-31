@@ -3,6 +3,9 @@ const express = require('express');
 const router = new express.Router();
 const patient = require('../models/patients');
 
+// To extract dd/mm/yy from full Date 
+// const getDate = require('../functions/getDate');
+
 //Get all patients
 router.get('', async (req, res) => {
     try{
@@ -12,12 +15,34 @@ router.get('', async (req, res) => {
         if (!len) {                   
               return res.render('patients/patients', {info_msg: "No patients available"});                   
         }
+    //   patients.forEach( patient => {  
+    //                patient.admitDate = JSON.stringify(patient.admitDate).split('T')[0];
+    // });
     res.render('patients/patients', {patients, success_msg: req.flash('msg')});            
-    } catch (e) {
+    } catch (e) {   
+        console.log(e);
         // Internal Server Error
         res.status(500).render('error-500');
     }
 });
+
+// // Get Single Patient by ID
+router.get('/profile/:id', async (req, res) => {
+  try {
+      const Patient = await patient.findById(req.params.id);
+      if (!Patient)  {
+        //       //status 404 = Not Found
+        //   return res.status(404).send();
+        return res.render('error-404');
+      }
+     res.render('patients/profile', {Patient})
+  } catch (e) {
+      // Bad Request
+      res.status(400).send(e);
+  }
+  
+});
+
 
 //ADD Patients Page
 router.get('/add-patient', (req, res) => {
@@ -26,7 +51,7 @@ router.get('/add-patient', (req, res) => {
 
 
 // Add patient
-router.post('/add-patient', async (req, res) => {    
+router.post('/add-patient', async (req, res) => {  
     //Object Destructing 
    const {firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, email, status } = req.body;
    const Patients = await patient.find({});
@@ -34,7 +59,6 @@ router.post('/add-patient', async (req, res) => {
    const len = Patients.length+1;   
 
    const newPatient = new patient({id: len, firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, email, status });
-
    let errors = [];
    if(!firstName || !gender || !status)
    {
@@ -42,15 +66,13 @@ router.post('/add-patient', async (req, res) => {
            return res.render('patients/add-patient', {errors, newPatient})
    }
 try{       
-   console.log("try"); 
    await newPatient.save();   
    req.flash('msg', `Patient (${firstName} ${lastName}) added successfully`);
    res.redirect('/patients');
    //  // status 201 = Created
    // res.status(201).send('Account Created');    
-   console.log("DONE");
    }
-   catch (e) {
+   catch  {
        // Iternal Server Error
        res.status(500).send(e);
 }
@@ -66,21 +88,6 @@ try{
 
 
 
-// // Get Single Patient by ID
-// router.get('/profile/:id', async (req, res) => {
-//   try {
-//       const Patient = await patient.findById(req.params.id);
-//       if (!Patient)  {
-//               //status 404 = Not Found
-//           return res.status(404).send();
-//       }
-//      res.send(Patient);
-//   } catch (e) {
-//       // Bad Request
-//       res.status(400).send(e);
-//   }
-  
-// });
 
 
 
@@ -93,7 +100,7 @@ router.delete('/:id', async (req, res) => {
                 if (!Patient)
                     {
                         // Not Found
-                        return res.status(404).send();
+                        return res.render('error-404');
                     }
                 const patientID = Patient.id;
                

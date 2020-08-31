@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="ssets/img/favicon.ico">
+    <title>Profile</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+
+</head>
+
+<body>
+    <div class="main-wrapper">
+ {{>header}}
+        <div class="page-wrapper">
+             
+            <div class="content">
+               
+                <div class="row">
+                    {{>messages}}
+                    <div class="col-sm-7 col-6">
+                        <h4 class="page-title">Patient Profile</h4>
+                   </div>
+
+                    <div class="col-sm-5 col-6 text-right m-b-30">
+                        <a href="/doctors/edit-doctor/{{Patient._id}}" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit Profile</a>
+                    </div>
+                </div>
+                  
+                <div class="card-box profile-header">
+                  
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="profile-view">
+                                <div class="profile-basic">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="profile-info-left">
+                                                <h3 class="user-name m-t-0 mb-0">{{Patient.firstName}} &nbsp;{{Patient.lastName}}</h3>
+                                                
+                                                <div class="staff-id">Patient ID : PT-0{{Patient.id}}</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <ul class="personal-info">
+                                                 <li>
+                                                    <span class="title">Age:</span>
+                                                    <span class="text">{{Patient.age}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Gender:</span>
+                                                    <span class="text">{{Patient.gender}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Disease:</span>
+                                                    <span class="text">{{Patient.disease}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">Blood Group:</span>
+                                                    <span class="text">{{Patient.bloodGroup}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">Address:</span>
+                                                    <span class="text">{{Patient.address}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">City:</span>
+                                                    <span class="text">{{Patient.city}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">Phone:</span>
+                                                    <span class="text">{{Patient.phone}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">Email:</span>
+                                                    <span class="text">{{Patient.email}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Admit Date</span>
+                                                    <span class="text">{{Patient.admitDate}}</span>
+                                                </li>                    
+                                                <li>
+                                                    <span class="title">Status</span>
+                                                    <span class="text">{{Patient.status}}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                        
+                        </div>
+                    </div>
+                    
+                </div>
+           
+        </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="/assets/js/jquery-3.2.1.min.js"></script>
+	<script src="/assets/js/popper.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.js"></script>
+    <script src="/assets/js/app.js"></script>
+</body>
+
+</html>

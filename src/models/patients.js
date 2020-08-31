@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const getDate = require('../functions/getDate');
 
 var patientSchema = mongoose.Schema({
     id :        {type: Number, unique: true},
@@ -15,7 +16,7 @@ var patientSchema = mongoose.Schema({
     address:   {type: String},     
     city:      {type: String},    
     phone:     {type: String},
-    email: {type: String},
+    email:     {type: String},
     admitDate : { type: Date, default: Date.now},
     status: {
         type: String,

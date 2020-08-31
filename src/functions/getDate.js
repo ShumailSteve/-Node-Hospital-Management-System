@@ -1,7 +1,5 @@
 const getDate = function (date) {
-
-    const parsedDate = JSON.parse(date)
-    const d1 = new Date(parsedDate);
+    const d1 = date;
     const day = d1.getUTCDate();
     const mon = d1.getUTCMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12 
     const year = d1.getUTCFullYear();
