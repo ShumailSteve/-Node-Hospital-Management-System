@@ -3,8 +3,17 @@ const express = require('express');
 const router = new express.Router();
 const patient = require('../models/patients');
 
-// To extract dd/mm/yy from full Date 
-// const getDate = require('../functions/getDate');
+// FOR DELETING USING href
+router.use( function( req, res, next ) {
+    // if _method exists then set req.method 
+     if ( req.query._method == 'DELETE' ) {
+         // change the original method to DELETE Method
+         req.method = 'DELETE';
+         // set requested url
+         req.url = req.path;
+     }       
+     next(); 
+ });
 
 //Get all patients
 router.get('', async (req, res) => {
@@ -43,7 +52,6 @@ router.get('/profile/:id', async (req, res) => {
   
 });
 
-
 //ADD Patients Page
 router.get('/add-patient', (req, res) => {
     res.render('patients/add-patient');
@@ -73,49 +81,87 @@ try{
    // res.status(201).send('Account Created');    
    }
    catch  {
-       // Iternal Server Error
-       res.status(500).send(e);
+       // Internal Server Error
+       res.render('error-500');
 }
 });
 
-
-
  // Get Edit Patient Page
- router.get('/edit-patient', (req, res) => {
-    res.render('patients/edit-patient');
+ router.get('/edit-patient/:id', async (req, res) => {
+     try{
+        const Patient = await patient.findById(req.params.id);
+        // If Patient doesn't exists
+        if(!Patient) {
+           return res.render('error-404');
+        }
+        res.render('patients/edit-patient', {patient: Patient, info_msg: req.flash('info_msg')});
+     } catch {
+         // Internal Server Error
+         res.render('error-500');
+     }
 });
 
+// Edit Patient
+router.patch('/:id', async (req, res) => {
+            // If any required field is not provided
+            if(!req.body.firstName || !req.body.gender || !req.body.status)
+            {
+                    req.flash('info_msg', 'Please fill all required fields');
+                    res.redirect(`/patients/edit-patient/${req.params.id}`);
+                    return;
+            }
 
+            const updates = Object.keys(req.body);
+            const allowedUpdates = ['firstName', 'lastName', 'age', 'bloodGroup', 'disease', 'gender',
+                                    'address', 'city', 'phone', 'email', 'status'];
+                                    
+            const isValidOperation = updates.every( (update) => 
+                                    allowedUpdates.includes(update));
+            // If not allowed fields update requested
+            if (!isValidOperation) {
+                return res.redirect('/patients');
+            }
 
-
-
-
-
-// Delete Single Patient
-router.delete('/:id', async (req, res) => {
-        try {
-                  const id = req.params.id;
-                // Get num of account being deleted
-                const Patient = await patient.findById(id);
-                if (!Patient)
-                    {
-                        // Not Found
-                        return res.render('error-404');
+            try {
+                    const Patient =  await patient.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
+                    if (!Patient) {
+                    // Not Found
+                    return res.render('error-404');
                     }
-                const patientID = Patient.id;
-               
-                // Delete Account
-                await patient.findByIdAndDelete(id);                
+                    req.flash('msg', `Patient [${Patient.id} : ${Patient.firstName} ${Patient.lastName} ] updated Successully`);
+                    res.redirect('/patients');    
+            }
+            catch {
+               //Internal Server Error
+                res.render('error-500');
+            }
+        });
 
-                // Decrement nums by one of all accounts below deleted account
-                await patient.updateMany({"id" : {$gt: patientID}}, {$inc: {id: -1}});
-                
-                // Status 410 = Deleted
-                res.status(410).send('Account Deleted');
-            } catch (e) {
-            res.status(400).send(e);
-        }
- });
+ // Delete Single Patient
+router.delete('/:id', async (req, res) => {
+            try {
+                    const Patient = await patient.findById(req.params.id);
+                    if (!Patient)
+                        {
+                            // Not Found
+                            return res.render('error-404');
+                        }
+                    // Delete Patient
+                    await patient.findByIdAndDelete(req.params.id);   
+
+                    // Serial No. of deleted patient
+                    const deletedPatientID = Patient.id;                
+
+                    // Decrement id (Serial No.)  by one of all accounts below deleted account
+                    await patient.updateMany({"id" : {$gt: deletedPatientID}}, {$inc: {id: -1}});
+                    
+                    req.flash('msg', 'Patient Deleted Successfully');
+                    res.redirect('/patients');
+                } catch {
+                //Internal Server Error
+                res.render('error-500');
+            }
+    });
 
  // Delete All Patients (Promise)
 router.delete('/', (req, res) => {
@@ -134,40 +180,5 @@ router.delete('/', (req, res) => {
      // Internal Server Error
     .catch (e => res.status(500).send(e)); 
  });
-
-
-
-// Edit Patient
-router.patch('/:id', async (req, res) => {
-        const updates = Object.keys(req.body);
-        const allowedUpdates = ['firstName', 'lastName', 'age', 'username', 'email', 'password', 'DOB', 'gender', 
-                                'bloodGroup', 'address', 'country', 'city', 'postalCode', 'phone', 'img', 'details', 'status'];
-                                
-        const isValidOperation = updates.every( (update) => 
-                                 allowedUpdates.includes(update));
-       
-        if (!isValidOperation) {
-            return res.status(400).send({error: 'Invalid Updates!'});
-        }
-          // // Parse only if DOB update required
-          if(req.body.DOB)
-          {
-            const date = JSON.parse(req.body.DOB);
-            req.body.DOB = date;
-          }
-          
-          
-        try {
-                const user =  await patient.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
-                if (!user) {
-                   // Not Found
-                   return res.status(404).send();
-                }
-                res.send(user);
-        }
-        catch (e) {
-            res.status(400).send(e);
-        }
-});
 
 module.exports = router;

@@ -17,11 +17,20 @@ var patientSchema = mongoose.Schema({
     city:      {type: String},    
     phone:     {type: String},
     email:     {type: String},
-    admitDate : { type: Date, default: Date.now},
+    admitDate : { type: Date, default : Date.now},
     status: {
         type: String,
         enum: ["active", "inactive"] 
      }
 }, {timestamps: true});
+
+// patientSchema.pre('save', function (next) {
+//         const d = new Date.now;
+//         console.log(d);
+//         this.admitDate = getDate(d);
+//        next();
+// });
+
+
 
 module.exports = mongoose.model('patient', patientSchema);

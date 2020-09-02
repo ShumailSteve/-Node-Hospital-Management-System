@@ -11,11 +11,12 @@ router.use( function( req, res, next ) {
     if ( req.query._method == 'DELETE' ) {
         // change the original method to DELETE Method
         req.method = 'DELETE';
-        // and set requested url to /user/12
+        // set requested url
         req.url = req.path;
     }       
     next(); 
 });
+
 // Set Storage for Image
 var storage = multer.diskStorage({
         destination: function (req, file, cb) {
@@ -226,19 +227,19 @@ router.delete('/:id', async (req, res) => {
  });
 
  // Delete All (Promise)
-router.delete('/', (req, res) => {    
-    doctor.deleteMany().then( (doc) =>  {     
-        // if no doctors availab
-        if (doc.deletedCount == 0)        {
-            // Not Found
-            return res.status(404).send("No doctors are present in db");
-        }
-        // Gone 
-        res.status(410).send('All Deleted')
-     } )
-     // Internal Server Error
-    .catch (e => res.status(500).send(e)); 
- });
+// router.delete('/', (req, res) => {    
+//     doctor.deleteMany().then( (doc) =>  {     
+//         // if no doctors availab
+//         if (doc.deletedCount == 0)        {
+//             // Not Found
+//             return res.status(404).send("No doctors are present in db");
+//         }
+//         // Gone 
+//         res.status(410).send('All Deleted')
+//      } )
+//      // Internal Server Error
+//     .catch (e => res.status(500).send(e)); 
+//  });
 
 //SCHEDULES
 
