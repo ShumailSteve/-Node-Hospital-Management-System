@@ -31,58 +31,7 @@
                         <a href="/employees/salary/add-salary" class="btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Add Salary</a>
                     </div>
                 </div>
-              <form action="/doctors/salary" method="GET">
-                <div class="row filter-row">
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <div class="form-group form-focus">
-                            <label class="focus-label">Doctor Name</label>
-                            <input type="text" class="form-control floating" name="name">
-                        </div>
-                    </div>
-              
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <div class="form-group form-focus select-focus">
-                            <label class="focus-label">Role</label>
-                            <select class="select floating">
-                                <option> -- Select -- </option>
-                                <option>Employee</option>
-                                <option>Manager</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <div class="form-group form-focus select-focus">
-                            <label class="focus-label">Leave Status</label>
-                            <select class="select floating">
-                                <option> -- Select -- </option>
-                                <option> Pending </option>
-                                <option> Approved </option>
-                                <option> Rejected </option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <div class="form-group form-focus">
-                            <label class="focus-label">From</label>
-                            <div class="cal-icon">
-                                <input class="form-control floating datetimepicker" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <div class="form-group form-focus">
-                            <label class="focus-label">To</label>
-                            <div class="cal-icon">
-                                <input class="form-control floating datetimepicker" type="text">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
-                        <button class="btn btn-success btn-block btn-primary submit-btn"> Submit</button>
-                       
-                    </div>
-             </div>
-            </form>
+              {{>_docSearchForm}}
                 <div class="row">
                     <div class="col-md-12">
                         <div class="table-responsive">

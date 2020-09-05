@@ -58,8 +58,10 @@ router.get('/add-doctor', (req, res) => {
 
 //Get all Doctors 
 router.get('', async (req, res) => {
+        let query = searchQuery(req);
+        const url = "/doctors";
         try{
-            const doctors = await doctor.find({});
+            const doctors = await query.exec();
             const len = doctors.length;
  
             // If no doctors
@@ -336,14 +338,16 @@ router.patch('/edit-schedule/:id', async (req, res) => {
 
 // Doctors Salary List
 router.get('/salary', async (req, res) => {
-    // Get all doctors
+      let query = searchQuery(req);
+       const url = "/doctors/salary";
+    // Get Doctors
     try {
-        const docs = await doctor.find({});
+        const docs = await query.exec();
       // If no doctors 
         if(docs.length == 0){
-                return res.render('doctors/salary', {info_msg: "No doctors available currently"});
+                return res.render('doctors/salary', {info_msg: "No doctors available"});
         }
-        res.render('doctors/salary', {docs, success_msg: req.flash('msg')});
+        res.render('doctors/salary', {docs, url, success_msg: req.flash('msg')});
     } catch (e) {
         // Internal Server Error
         res.status(500).render('error-500');
@@ -446,8 +450,25 @@ function assignAndRemoveImage (file) {
     }
 }
 
-
-
-
+function searchQuery (req) {
+            let query = doctor.find();
+            if(req.query.name != null && req.query.name != '')
+            {
+                query = query.regex('firstName', new RegExp(req.query.name, 'i'));
+            }
+            if(req.query.department != null && req.query.department != '')
+            {
+                query = query.regex('department', new RegExp(req.query.department, 'i'));
+            }
+            if(req.query.joinedBefore != null && req.query.joinedBefore != '')
+            {
+                query = query.lte('joiningDate', req.query.joinedBefore);
+            }
+            if(req.query.joinedAfter != null && req.query.joinedAfter != '')
+            {
+                query = query.gte('joiningDate', req.query.joinedAfter);
+            }
+            return query;
+} 
 
 module.exports = router;

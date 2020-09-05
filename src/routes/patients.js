@@ -80,7 +80,8 @@ try{
    //  // status 201 = Created
    // res.status(201).send('Account Created');    
    }
-   catch  {
+   catch (e) {
+       console.log(e);
        // Internal Server Error
        res.render('error-500');
 }

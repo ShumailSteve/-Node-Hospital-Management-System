@@ -37,4 +37,5 @@ var doctorSchema = mongoose.Schema({
   },
   {timestamps: true});
 
+
 module.exports = mongoose.model('doctor', doctorSchema);
