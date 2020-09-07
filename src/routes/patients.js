@@ -17,22 +17,24 @@ router.use( function( req, res, next ) {
 
 //Get all patients
 router.get('', async (req, res) => {
-    try{
-        const patients = await patient.find();
-        const len = patients.length;
-         // If no patients 
-        if (!len) {                   
-              return res.render('patients/patients', {info_msg: "No patients available"});                   
-        }
-    //   patients.forEach( patient => {  
-    //                patient.admitDate = JSON.stringify(patient.admitDate).split('T')[0];
-    // });
-    res.render('patients/patients', {patients, success_msg: req.flash('msg')});            
-    } catch (e) {   
-        console.log(e);
-        // Internal Server Error
-        res.status(500).render('error-500');
-    }
+            let query = searchQuery(req);
+            const url = "/patients"
+            try{
+                const patients = await query.exec();
+                const len = patients.length;
+                // If no patients 
+                if (!len) {                   
+                    return res.render('patients/patients', {info_msg: "No patients available"});                   
+                }
+            //   patients.forEach( patient => {  
+            //                patient.admitDate = JSON.stringify(patient.admitDate).split('T')[0];
+            // });
+            res.render('patients/patients', {patients, url, success_msg: req.flash('msg')});            
+            } catch (e) {   
+                console.log(e);
+                // Internal Server Error
+                res.status(500).render('error-500');
+            }
 });
 
 // // Get Single Patient by ID
@@ -182,4 +184,23 @@ router.delete('/', (req, res) => {
     .catch (e => res.status(500).send(e)); 
  });
 
+ function searchQuery(req) {
+        let query = patient.find();
+        if(req.query.name != null && req.query.name != '') {
+                query = query.regex('firstName', new RegExp(req.query.name, 'i'));
+        }
+        if(req.query.age != null && req.query.age != '') {
+            query = query.where('age', req.query.age)
+        } 
+        if(req.query.disease != null && req.query.disease != '') {
+            query = query.regex('disease', new RegExp(req.query.disease, 'i'));
+        }
+        if(req.query.admittedBefore != null && req.query.admittedBefore != '') {
+            query = query.lte('admitDate', req.query.admittedBefore);
+        } 
+        if(req.query.admittedAfter != null && req.query.admittedAfter!= '') {
+            query = query.gte('admitDate', req.query.admittedAfter)
+        } 
+        return query;
+ }
 module.exports = router;

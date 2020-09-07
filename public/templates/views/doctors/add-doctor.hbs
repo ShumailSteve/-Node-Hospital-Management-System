@@ -52,19 +52,30 @@
                                         <input class="form-control" type="text" name="email"  value="{{doc.email}}" >
                                 </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Department<span class="text-danger">*</span> </label>
-                                        <input class="form-control" type="text" name="department"   value="{{doc.department}}" >
-                                    </div>
-                                </div>
+                                 <div class="col-sm-6 col-md-6 col-lg-3">
+											<div class="form-group">
+												<label>Department<span class="text-danger">*</span> </label>
+                                                 <input class="form-control" type="text" name="department"  value="{{doc.department}}" >
+												 {{!-- <select class="form-control select" name="department" style="width: 100px;">
+                                                   {{!-- <option value={{doc.department}}>
+                                                       {{#if doc.department}}
+                                                             {{doc.department}}                                                       
+                                                        {{else}}
+                                                                Select City
+                                                         {{/if}}
+                                                    </option> --}}
+													{{!-- <option value={{"Karachi"}}>Karachi</option>
+													<option value="Hyderabad">Hyderabad</option>
+													<option value="Lahore">Lahore</option>
+                                                    <option value="Peshawar">Peshawar</option>
+												</select> --}} 
+											</div>
+										</div>
                                 
 								<div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Date of Birth<span class="text-danger">*</span></label>
-                                        <div class="cal-icon">
-                                            <input type="text" class="form-control datetimepicker" name="DOB" onblur="this.placeholder='dd/mm/yy'" onfocus="this.placeholder=''" value="{{doc.DOB}}">
-                                         </div>
+                                            <input type="date" class="form-control floating" name="DOB" onblur="this.placeholder='dd/mm/yy'" onfocus="this.placeholder=''" value="{{doc.DOB}}">
                                     </div>
                                 </div>
                                 <div class="form-group">
@@ -124,9 +135,7 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Joining Date</label>
-                                        <div class="cal-icon">
-                                            <input type="text" class="form-control datetimepicker" name="joiningDate" value="{{doc.joiningDate}}" >
-                                        </div>
+                                         <input class="form-control floating " type="date" style="width: 300px; height: 40px;"   name="joiningDate" value="{{doc.joiningDate}}" >
                                     </div>
                                 </div>
                                   <div class="col-sm-6">

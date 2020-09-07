@@ -10,7 +10,7 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/select2.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/dataTables.bootstrap4.min.css">
-    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap-datetimepicker.min.css">
+    {{!-- <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap-datetimepicker.min.css"> --}}
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
 </head>
 
@@ -28,7 +28,8 @@
                         <a href="/patients/add-patient" class="btn btn btn-primary btn-rounded float-right"><i class="fa fa-plus"></i> Add Patient</a>
                     </div>
                 </div>
-						<div class="row">
+				{{>_patientSearchForm}}
+				<div class="row">
 					<div class="col-md-12">
 						<div class="table-responsive">
 							<table class="table table-border table-striped custom-table mb-0">
@@ -96,7 +97,7 @@
     <script src="/assets/js/jquery.dataTables.min.js"></script>
     <script src="/assets/js/dataTables.bootstrap4.min.js"></script>
     <script src="/assets/js/moment.min.js"></script>
-    <script src="/assets/js/bootstrap-datetimepicker.min.js"></script>
+    {{!-- <script src="/assets/js/bootstrap-datetimepicker.min.js"></script> --}}
     <script src="/assets/js/app.js"></script>
 </body>
 

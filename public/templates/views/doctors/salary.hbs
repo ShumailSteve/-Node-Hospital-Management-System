@@ -38,8 +38,8 @@
                             <table class="table table-striped custom-table datatable">
                                 <thead>
                                     <tr>
-                                        <th style="width:25%;">Doctor Name</th>
                                         <th>Doctor ID</th>
+                                        <th style="width:25%;">Doctor Name</th>
                                         <th>Email</th>
                                         <th>Joining Date</th>
                                         <th>Department</th>
@@ -51,10 +51,10 @@
                             {{#each docs}}
                                 <tbody>
                                     <tr>
-                                        <td>
-											<img class="rounded-circle"  src="data:image;base64,{{img}}" height="28" width="20" alt=""> {{firstName}} {{lastName}}
-                                        </td>
                                         <td>D-00{{id}}</td>
+                                        <td>
+											<a href="/doctors/profile/{{_id}}"><img class="rounded-circle"  src="data:image;base64,{{img}}" height="28" width="20" alt=""> {{firstName}} {{lastName}}</a>
+                                        </td>                                        
                                         <td>{{email}}</td>
                                         <td>{{joiningDate}}</td>
                                         <td> {{department}}</td>

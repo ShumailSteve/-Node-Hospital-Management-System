@@ -3,30 +3,37 @@ const router = new express.Router();
 
 const department = require('../models/department');
 
-// Get all Departments
-router.get('', (req, res) => {
-        res.render('departments/departments');
+// // Get all Departments
+// router.get('', (req, res) => {
+//         res.render('departments/departments');
+// });
+
+// Get ADD Page
+router.get('/add-department', (req, res) => {
+    res.render('departments/add-department');
 });
 
-// Get Edit Page
-router.get('/edit-department', (req, res) => {
-    res.render('departments/edit-department');
-});
+
+// // Get Edit Page
+// router.get('/edit-department', (req, res) => {
+//     res.render('departments/edit-department');
+// });
 
 //Get all Departments
-router.get('/', async (req, res) => {
-    try {
-        const departments = await department.find();
-        const len  = departments.length;
-        // If no departments in db
-        if (!len) {
-            return res.status(404).send();
-        }
-        res.send({departments, len});
+router.get('', async (req, res) => {
+    res.render('departments/departments');
+//     try {
+//         const departments = await department.find();
+//         const len  = departments.length;
+//         // If no departments in db
+//         if (!len) {
+//             return res.status(404).send();
+//         }
+      
 
-   } catch (e) {
-   res.status(500).send();
-}
+//    } catch (e) {
+//    res.status(500).send();
+// }
 });
 
 // Get by ID
@@ -50,14 +57,14 @@ router.post('/add-department', async (req, res) => {
         const departments = await department.find();
         const len  = departments.length+1;
     
-        const {name, description, status } = req.body;
+        const {name, status } = req.body;
         try {
-        const newDepartment = new department({id: len, name, description, status});
+        const newDepartment = new department({id: len, name, status});
         await newDepartment.save();
         res.status(201).send();
 
    } catch (e) {
-   res.status(500).send();
+   res.status(500).send(e);
 }
 });
 

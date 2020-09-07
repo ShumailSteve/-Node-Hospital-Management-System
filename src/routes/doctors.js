@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const router = new express.Router();
 const doctor = require('../models/doctor');
+const department = require('../models/department');
 const multer = require('multer');
 
 // FOR DELETING USING href
@@ -37,7 +38,8 @@ var upload = multer(
             );
 
 // Get Add Doctor Page
-router.get('/add-doctor', (req, res) => {
+router.get('/add-doctor', async (req, res) => {
+    
     res.render('doctors/add-doctor');
 });
 
@@ -229,19 +231,19 @@ router.delete('/:id', async (req, res) => {
  });
 
  // Delete All (Promise)
-// router.delete('/', (req, res) => {    
-//     doctor.deleteMany().then( (doc) =>  {     
-//         // if no doctors availab
-//         if (doc.deletedCount == 0)        {
-//             // Not Found
-//             return res.status(404).send("No doctors are present in db");
-//         }
-//         // Gone 
-//         res.status(410).send('All Deleted')
-//      } )
-//      // Internal Server Error
-//     .catch (e => res.status(500).send(e)); 
-//  });
+router.delete('/', (req, res) => {    
+    doctor.deleteMany().then( (doc) =>  {     
+        // if no doctors availab
+        if (doc.deletedCount == 0)        {
+            // Not Found
+            return res.status(404).send("No doctors are present in db");
+        }
+        // Gone 
+        res.status(410).send('All Deleted')
+     } )
+     // Internal Server Error
+    .catch (e => res.status(500).send(e)); 
+ });
 
 //SCHEDULES
 

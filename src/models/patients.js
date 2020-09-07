@@ -17,7 +17,7 @@ var patientSchema = mongoose.Schema({
     city:      {type: String},    
     phone:     {type: String},
     email:     {type: String},
-    admitDate : { type: String},
+    admitDate : {type: String},
     status: {
         type: String,
         enum: ["active", "inactive"] 
@@ -25,8 +25,8 @@ var patientSchema = mongoose.Schema({
 }, {timestamps: true});
 
 patientSchema.pre('save', function (next) {
-        const d = new Date();
-        this.admitDate = d.toISOString().split('T')[0];
+        const currentDate = new Date();
+        this.admitDate = currentDate.toISOString().split('T')[0];
         next();
 });
 
