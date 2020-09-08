@@ -5,6 +5,7 @@ const departmentSchema = mongoose.Schema({
         name : {type: String, required: true},
         status : {
             type: String,
+            required: true, 
             enum: ["active", "inactive"]
         }
 }, {timestamps: true});
