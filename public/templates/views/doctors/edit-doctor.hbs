@@ -65,15 +65,23 @@
                                         > 
                                     </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Department </label>
-                                        <input class="form-control" type="text" name="department" 
-                                        {{#if doc.department}} 
-                                            value="{{doc.department}}"
-                                        {{/if}}>
-                                    </div>
-                                </div>
+                                <div class="col-sm-6 col-md-6 col-lg-3">
+											<div class="form-group">
+												<label>Department<span class="text-danger">*</span> </label>
+												 <select class="form-control select" name="department" style="width: 150px;">
+                                                  <option value={{doc.department}}> 
+                                                       {{#if doc.department}}
+                                                             {{doc.department}}                                                       
+                                                        {{else}}
+                                                                Select Department
+                                                         {{/if}}
+                                                    </option> 
+                                                    {{#each departments}}
+													<option value={{name}}>{{name}}</option>
+                                                    {{/each}}
+												</select> 
+											</div>
+										</div>
                                 
 								<div class="col-sm-6">
                                     <div class="form-group">

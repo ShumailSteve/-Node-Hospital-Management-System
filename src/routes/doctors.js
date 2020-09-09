@@ -39,8 +39,8 @@ var upload = multer(
 
 // Get Add Doctor Page
 router.get('/add-doctor', async (req, res) => {
-    
-    res.render('doctors/add-doctor');
+                const departments = await department.find({});
+                res.render('doctors/add-doctor', {departments});          
 });
 
  // Edit Doctor by ID
@@ -51,7 +51,8 @@ router.get('/add-doctor', async (req, res) => {
             if(!doc) {
                 return res.redirect('/doctors');                
             }   
-            res.render('doctors/edit-doctor', {doc});
+            const departments = await department.find({});
+            res.render('doctors/edit-doctor', {doc, departments});
      } catch {
             // Internal Server Error
             res.render('error-500');
@@ -115,13 +116,15 @@ router.post('/add-doctor', upload.single('img'), async (req, res) => {
                 status: req.body.status
             });
             let errors = [];
+            const departments = await department.find({});
             // If any required field is missing
             if(!newDoctor.firstName || !newDoctor.email ||  !newDoctor.department ||!newDoctor.DOB ||!newDoctor.gender || !newDoctor.address || !newDoctor.city || !newDoctor.phone || !newDoctor.status){
                 errors.push({msg: 'Please Fill all required fields'});   
                 // Send entered data back to client   
                 res.render('doctors/add-doctor', {
                     errors,
-                    doc: newDoctor
+                    doc: newDoctor,
+                    departments
                 });
                 return;
             }

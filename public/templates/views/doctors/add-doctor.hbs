@@ -55,23 +55,20 @@
                                  <div class="col-sm-6 col-md-6 col-lg-3">
 											<div class="form-group">
 												<label>Department<span class="text-danger">*</span> </label>
-                                                 <input class="form-control" type="text" name="department"  value="{{doc.department}}" >
-												 {{!-- <select class="form-control select" name="department" style="width: 100px;">
-                                                   {{!-- <option value={{doc.department}}>
+												 <select class="form-control select" name="department" style="width: 150px;">
+                                                  <option value={{doc.department}}> 
                                                        {{#if doc.department}}
                                                              {{doc.department}}                                                       
                                                         {{else}}
-                                                                Select City
+                                                                Select Department
                                                          {{/if}}
-                                                    </option> --}}
-													{{!-- <option value={{"Karachi"}}>Karachi</option>
-													<option value="Hyderabad">Hyderabad</option>
-													<option value="Lahore">Lahore</option>
-                                                    <option value="Peshawar">Peshawar</option>
-												</select> --}} 
+                                                    </option> 
+                                                    {{#each departments}}
+													<option value={{name}}>{{name}}</option>
+                                                    {{/each}}
+												</select> 
 											</div>
 										</div>
-                                
 								<div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Date of Birth<span class="text-danger">*</span></label>

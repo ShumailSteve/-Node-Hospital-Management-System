@@ -1,29 +1,38 @@
 const express = require('express');
 const router = new express.Router();
 
-const appointment = require('../models/appointments');
+const appointment = require('../models/appointment');
+const patient = require('../models/patients');
+const doctor =  require('../models/patients');
+const department = require('../models/department');
 const getDate = require("../functions/getDate");
 const getTime = require("../functions/getTime");
 
 //Get all appointments
-router.get('/',  async(req, res) => {
-        // try {
-        //      const appointments = await appointment.find();
-        //      const len = appointments.length;
-        //      if (!len) {
-        //          return res.status(404).send();
-        //      }
-        //      res.send({appointments, len});
-        // } catch (e) {
-        //     res.status(500).send();
-        // }
-        res.render('appointments/appointments');
+router.get('/',  async (req, res) => {
+        try {
+             const appointments = await appointment.find({});
+             const len = appointments.length;
+             if (!len) {
+                 return res.status(404).send("NO");
+             }
+             res.render('appointments/appointments', {appointments});
+        } catch (e) {
+            res.status(500).send();
+        }
+        
 });
 
 // Get Add Appointment Page
 router.get('/add-appointment',  async(req, res) => {
-    
-    res.render('appointments/add-appointment');
+    const patients = await patient.find({});
+    const doctors = await doctor.find({});
+    const appointments = await appointment.find({});
+    const departments = await department.find({});
+    const len = appointments.length + 1;
+    let errors = [];
+    errors.push({msg: req.flash('msg')});
+    res.render('appointments/add-appointment', {id: len, patients, doctors, departments, errors});
 });
 
 // Get Edit Appointment Page
@@ -53,40 +62,29 @@ router.get('/add-appointment', (req, res) => {
 
 //Add appointment
 router.post('/add-appointment', async (req, res) => {
+     // Object Destructuring
+     const {patient, department, doctor, appointmentDate, appointmentTime, message, status} = req.body;
+     let errors = [];
+     // If required fields are empty
+     if(!patient || !department || !doctor || !appointmentDate || !appointmentTime || !status) {
+         req.flash('msg', 'Please fill all required fields');
+         res.redirect("/appointments/add-appointment");
+         return;
+     }
 
-        //  const appointmentDate = req.body.appointmentDate;
-        // const appointmentTime = JSON.parse(req.body.appointmentTime);
-      
-        // const d1 = new Date(appointmentTime);
-        // const date = d1.getUTCDate();
-        // const mon = d1.getUTCMonth() + 1; // Since getMonth() returns month from 0-11 not 1-12 
-        // const year = d1.getUTCFullYear();
-        // const newDate = date + "/" + mon + "/" + year;
-        // console.log(newDate);
-        // const time = d1.getUTCHours();
-        // const min = d1.getUTCMinutes()
-        // console.log(time+':'+min);
+     const Appointments = await appointment.find({});
+     // For Generating Auto-incremental id
+     const len = Appointments.length+1;
 
-    const Appointments = await appointment.find();
-    // For Generating Auto-incremental id
-    const len = Appointments.length+1;
-
-    // // Parse incoming Date and Time
-    const appointmentDate = getDate(req.body.appointmentDate);
-    const appointmentTime = getTime(req.body.appointmentTime);
-
-    // Object Destructuring
-    const {patientID, patientName, department, doctor, message, status} = req.body;
+    const newAppointment = new appointment({id: len, patient, department, doctor, appointmentDate, appointmentTime, message, status});
+   
     try {
-        
-            const newAppointment = new appointment({id: len, patientID, patientName, department, doctor, appointmentDate, appointmentTime, message, status});
-            await newAppointment.save();
-            res.status(201).send();
+          await newAppointment.save();
+            res.redirect('/appointments');
      }  catch (e) {
             // Internal Server Error
             res.status(500).send(e);
     }
-
 });
 
 //Edit appointment
