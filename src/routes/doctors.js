@@ -91,6 +91,31 @@ router.get('/profile/:id', async (req, res) => {
             } 
 });
 
+
+// Get Docs by Department Name
+router.get('/department', async (req, res) => {
+    try {
+        const doc = await doctor.find({department: req.query.department});
+        // If no doctor with given id
+        if(!doc)  return res.status(400).send("No Doctor");
+        var docNames = [];
+        var docIDs = [];
+        // DB _id
+        var doc_IDs = [];
+        // push name of each doctor
+        doc.forEach( doctor => { 
+                            var fullname =  doctor.firstName+ " "+ doctor.lastName;
+                            docNames.push(fullname);
+                            docIDs.push(doctor.id);
+                            doc_IDs.push(doctor._id);
+      });
+        res.send({docNames, docIDs, doc_IDs});
+    } catch {
+        //Internal Server Error
+        res.send({Error: "Error"});
+    } 
+});
+
 // Add Doctor
 router.post('/add-doctor', upload.single('img'), async (req, res) => {
               // Assign Image to img and Delete
@@ -476,4 +501,18 @@ function searchQuery (req) {
             return query;
 } 
 
+
 module.exports = router;
+
+// const getDocs =  async () => {
+//     const docs = await doctor.find({department: "Cancer"});
+//     console.log(docs);
+//     console.log("END");
+// };
+
+// module.exports = getDocs;
+
+
+
+
+

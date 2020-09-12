@@ -22,8 +22,10 @@
     <div class="main-wrapper">
         {{>header}}
         <div class="page-wrapper">
+               
             <div class="content">
-                <div class="row">
+                {{>messages}}
+               <div class="row">
                     <div class="col-sm-4 col-3">
                         <h4 class="page-title">Appointments</h4>
                     </div>
@@ -39,7 +41,6 @@
 									<tr>
 										<th>Appointment ID</th>
 										<th>Patient Name</th>
-										<th>Age</th>
 										<th>Doctor Name</th>
 										<th>Department</th>
 										<th>Appointment Date</th>
@@ -51,9 +52,8 @@
 								<tbody>
                                 {{#each appointments}}
 									<tr>
-										<td>APT-0{{id}}</td>
+										<td><a href="/appointments/edit-appointment/{{_id}}">APT-0{{id}} </a></td>
 										<td>{{patient}}</td>
-										<td>35</td>
 										<td>{{doctor}}</td>
 										<td>{{department}}</td>
 										<td>{{appointmentDate}}</td>

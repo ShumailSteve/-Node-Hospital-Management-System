@@ -3,18 +3,32 @@ const router = new express.Router();
 
 const appointment = require('../models/appointment');
 const patient = require('../models/patients');
-const doctor =  require('../models/patients');
+const doctor =  require('../models/doctor');
 const department = require('../models/department');
 const getDate = require("../functions/getDate");
 const getTime = require("../functions/getTime");
 
+// FOR DELETING USING href
+router.use( function( req, res, next ) {
+    // if _method exists then set req.method 
+     if ( req.query._method == 'DELETE' ) {
+         // change the original method to DELETE Method
+         req.method = 'DELETE';
+         // set requested url
+         req.url = req.path;
+     }       
+     next(); 
+ });
+
+ 
 //Get all appointments
 router.get('/',  async (req, res) => {
         try {
-             const appointments = await appointment.find({});
+            //  const appointments = await appointment.findOne({}).populate('patient').exec();
+            const appointments = await appointment.find({});
              const len = appointments.length;
              if (!len) {
-                 return res.status(404).send("NO");
+                    return res.render('appointments/appointments', {info_msg: "No Appointments available"} )
              }
              res.render('appointments/appointments', {appointments});
         } catch (e) {
@@ -36,23 +50,27 @@ router.get('/add-appointment',  async(req, res) => {
 });
 
 // Get Edit Appointment Page
-router.get('/edit-appointment',  async(req, res) => {
-    
-    res.render('appointments/edit-appointment');
+router.get('/edit-appointment/:id',  async(req, res) => {
+    console.log("Called");
+            const patients = await patient.find({});
+            const doctors = await doctor.find({});
+            const departments = await department.find({});
+            const appt = await appointment.findById(req.params.id);
+            res.render('appointments/edit-appointment', {patients, doctors, departments, appointment: appt});
 });
 
 // Get by ID
-router.get('/:id',  async(req, res) => {
-    try {
-         const app = await appointment.findById(req.params.id);
-            if (!app) {
-             return res.status(404).send();
-         }
-         res.send(app);
-    } catch (e) {
-        res.status(400).send();
-    }
-});
+// router.get('/:id',  async(req, res) => {
+//     try {
+//          const app = await appointment.findById(req.params.id);
+//             if (!app) {
+//              return res.status(404).send();
+//          }
+//          res.send(app);
+//     } catch (e) {
+//         res.status(400).send();
+//     }
+// });
 
 // Get Add Appointments Page
 router.get('/add-appointment', (req, res) => {
@@ -166,7 +184,5 @@ router.delete('/:id', async (req, res) => {
         res.status(400).send(e);
     }
 });
-
-
 
 module.exports = router;

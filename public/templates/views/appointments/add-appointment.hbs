@@ -12,6 +12,13 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
 
+     {{!-- <script>
+         function random() {
+             var dept = document.getElementById("department").value;
+             var output = document.getElementById("output");
+             output.innerHTML = dept;
+         }
+     </script> --}}
 </head>
 
 <body>
@@ -41,7 +48,7 @@
 										<select class="select" name="patient">
 											<option value="">Select</option>
 											{{#each patients}}
-                                             <option value="{{_id}}">[PT: {{id}}] {{firstName}} {{lastName}}</option>
+                                             <option value="{{firstName}} {{lastName}}">[PT: {{id}}] {{firstName}} {{lastName}}</option>
                                              {{/each}}
 										</select>
 									</div>
@@ -51,22 +58,19 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Department<span class="text-danger">*</span> </label>
-                                        <select class="select" name="department">
+                                        <select class="select" id="department" name="department" onchange="random()">
                                             <option value="">Select</option>
                                            {{#each departments}}
                                              <option value={{name}}>{{name}}</option>
                                              {{/each}}
                                         </select>
                                     </div>
+                                    
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Doctor<span class="text-danger">*</span> </label>
-                                        <select class="select" name="doctor">
-											<option value="" >Select</option>
-											{{#each doctors}}
-                                             <option value={{_id}}>(Doc : {{id}}) {{firstName}} {{lastName}}</option>
-                                             {{/each}}
+                                        <select class="select" id="doctor" name="doctor">
                                         </select>
                                     </div>
                                 </div>
@@ -128,6 +132,7 @@
 	<script src="/assets/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/assets/js/app.js"></script>
       <script src="/assets/js/minDate.js"></script>
+    <script src="/assets/js/setDocs.js"></script>
 
 	<script>
             $(function () {
@@ -136,6 +141,7 @@
                 });
             });
      </script>
+   
 </body>
 
 
