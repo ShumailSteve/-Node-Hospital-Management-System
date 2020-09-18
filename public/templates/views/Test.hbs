@@ -1,1 +1,22 @@
-TEST
+<!DOCTYPE html>
+<html>
+<head>
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+<script>
+$(function() {
+    $( "#datepicker" ).datepicker(
+    {
+        beforeShowDay: function(d) {
+            var day = d.getDay();
+            return [(day != 0 && day != 3)];
+        }
+    });
+  });
+  </script>
+</head>
+<body>
+<input type="text" id="datepicker">
+</body>
+</html>

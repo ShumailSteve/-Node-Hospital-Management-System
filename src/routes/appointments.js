@@ -40,13 +40,12 @@ router.get('/',  async (req, res) => {
 // Get Add Appointment Page
 router.get('/add-appointment',  async(req, res) => {
     const patients = await patient.find({});
-    const doctors = await doctor.find({});
     const appointments = await appointment.find({});
     const departments = await department.find({});
     const len = appointments.length + 1;
     let errors = [];
     errors.push({msg: req.flash('msg')});
-    res.render('appointments/add-appointment', {id: len, patients, doctors, departments, errors});
+    res.render('appointments/add-appointment', {id: len, patients, departments, errors});
 });
 
 // Get Edit Appointment Page
@@ -72,37 +71,40 @@ router.get('/edit-appointment/:id',  async(req, res) => {
 //     }
 // });
 
-// Get Add Appointments Page
-router.get('/add-appointment', (req, res) => {
-    // res.render('add-appointment');
-    res.send("HH");
-});
 
 //Add appointment
 router.post('/add-appointment', async (req, res) => {
-     // Object Destructuring
-     const {patient, department, doctor, appointmentDate, appointmentTime, message, status} = req.body;
-     let errors = [];
-     // If required fields are empty
-     if(!patient || !department || !doctor || !appointmentDate || !appointmentTime || !status) {
-         req.flash('msg', 'Please fill all required fields');
-         res.redirect("/appointments/add-appointment");
-         return;
-     }
+            // Object Destructuring
+            const {patient, department, doc, appointmentDate, appointmentTime, message, status} = req.body;
+            let errors = [];
+            // If required fields are empty
+            if(!patient || !department || !doc || !appointmentDate || !appointmentTime || !status) {
+                req.flash('msg', 'Please fill all required fields');
+                res.redirect("/appointments/add-appointment");
+                return;
+            }
+            const Doctor = await  doctor.findById(doc);
+            // If appointment Time is less or greater than Doctor Available hours
+           if (appointmentTime < Doctor.availableFrom  && appointmentTime > Doctor.availableTill)
+           {
+            req.flash('msg', 'Doctor not available at selected time, please select correct time');
+            res.redirect("/appointments/add-appointment");
+            return;
+           }
+           console.log("PR");
+    //  const Appointments = await appointment.find({});
+    //  // For Generating Auto-incremental id
+    //  const len = Appointments.length+1;
 
-     const Appointments = await appointment.find({});
-     // For Generating Auto-incremental id
-     const len = Appointments.length+1;
-
-    const newAppointment = new appointment({id: len, patient, department, doctor, appointmentDate, appointmentTime, message, status});
+    // const newAppointment = new appointment({id: len, patient, department, doctor, appointmentDate, appointmentTime, message, status});
    
-    try {
-          await newAppointment.save();
-            res.redirect('/appointments');
-     }  catch (e) {
-            // Internal Server Error
-            res.status(500).send(e);
-    }
+    // try {
+    //       await newAppointment.save();
+    //       res.redirect('/appointments');
+    //  }  catch (e) {
+    //         // Internal Server Error
+    //         res.status(500).send(e);
+    // }
 });
 
 //Edit appointment

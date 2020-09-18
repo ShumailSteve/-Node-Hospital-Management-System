@@ -18,7 +18,9 @@ var doctorSchema = mongoose.Schema({
   //  country: { type: String },
    city: {type: String, required: true},
    phone: {type: String, required: true, trim: true},
-   availableDays: {type: String},
+   availableDays: [
+                    {type: String}
+                  ],
    availableFrom: {type: String},  
    availableTill: {type: String}, 
    joiningDate:{type: String},

@@ -132,7 +132,7 @@
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Joining Date</label>
-                                         <input class="form-control floating " type="date" style="width: 300px; height: 40px;"   name="joiningDate" value="{{doc.joiningDate}}" >
+                                         <input class="form-control floating " type="date" style="width: 300px; height: 40px;" id="joiningDate"   name="joiningDate" value="{{doc.joiningDate}}" onclick="minDate(this)">
                                     </div>
                                 </div>
                                   <div class="col-sm-6">
@@ -195,6 +195,7 @@
 	<script src="/assets/js/moment.min.js"></script>
 	<script src="/assets/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/minDate.js"></script>
 </body>
 
 </html>

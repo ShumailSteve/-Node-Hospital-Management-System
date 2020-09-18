@@ -5,6 +5,7 @@ const router = new express.Router();
 const doctor = require('../models/doctor');
 const department = require('../models/department');
 const multer = require('multer');
+const { time } = require('console');
 
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
@@ -291,19 +292,37 @@ router.get('/schedules', async (req, res) => {
        }  
 });
 
+// Get Doctor Schedule
+router.get('/schedule', async (req, res) => {
+    try {
+        const doc = await doctor.findById(req.query.id);
+        // If no doctor with given id
+        if(!doc)  return res.render('error-404');
+        const Days = doc.availableDays;
+        const availableFrom = doc.availableFrom;
+        const availableTill = doc.availableTill;
+        res.send({Days, availableFrom, availableTill});
+        
+    } catch {
+        //Internal Server Error
+        res.send({Error: "Error"});
+    } 
+});
+
 // Add Schedule by Doc _id
 router.get('/add-schedule/:id', async(req, res) => {
             try{
                 const doc = await doctor.findById(req.params.id);
-                var name = doc.lastName + ',' + doc.firstName;
-                res.render('doctors/add-schedule', {id: doc._id, name, success_msg: req.flash('msg')} );
+
+                res.render('doctors/add-schedule', {id: doc._id, firstName: doc.firstName, lastName: doc.lastName, success_msg: req.flash('msg')} );
             }catch(e) {
                 // Not Found
+                console.log(e);
                 res.render('error-404');
             }    
 });
 
-// Add Schdule of Doc 
+// Add Schedule of Doc 
 router.post('/add-schedule/:id', async (req, res) => {
             try{
                 const doc = await doctor.findById(req.params.id);
@@ -312,9 +331,7 @@ router.post('/add-schedule/:id', async (req, res) => {
                     return res.render('error-404');
                 }
 
-                // Convert availableDays to String
-                var availableDaysString = JSON.stringify(req.body.availableDays);
-                doc.availableDays = availableDaysString;
+                doc.availableDays = req.body.availableDays;
                 doc.availableFrom = req.body.availableFrom;
                 doc.availableTill = req.body.availableTill;
                 await doc.save();
@@ -335,8 +352,7 @@ router.get('/edit-schedule/:id', async (req, res) => {
                     return res.render('error-404');
                 }                
                 const {firstName, lastName, availableDays, availableFrom, availableTill} = doc;
-                var name = doc.lastName + ',' + doc.firstName;
-                res.render('doctors/edit-schedule', {id: req.params.id, name, availableDays, availableFrom, availableTill});
+                res.render('doctors/edit-schedule', {id: req.params.id, firstName, lastName, availableDays, availableFrom, availableTill});
             } catch (e) {
                 // Internal Server Error
                 res.render('error-500');
@@ -352,7 +368,7 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                  if(!doc) {
                      return res.render('error-404');
                  }  
-                doc.availableDays = JSON.stringify(req.body.availableDays);
+                doc.availableDays = req,body.availableDays;
                 doc.availableFrom = req.body.availableFrom;
                 doc.availableTill = req.body.availableTill;
                 await doc.save();
@@ -360,7 +376,7 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                 res.redirect(`/doctors/schedules`);
             } catch (e) {
                 // Internal Server Error
-                res.render('error-500');
+                res.send(e);
             }        
 });
 
@@ -388,8 +404,7 @@ router.get('/salary', async (req, res) => {
 router.get('/add-salary/:id', async(req, res) => {
         try{
             const doc = await doctor.findById(req.params.id);
-            var name = doc.lastName + ',' + doc.firstName;
-            res.render('doctors/add-salary', {id: doc._id, name, success_msg: req.flash('msg')} );
+            res.render('doctors/add-salary', {id: doc._id, firstName: doc.firstName, lastName: doc.lastName, success_msg: req.flash('msg')} );
         }catch {
             // Not Found
             res.render('error-404');
@@ -442,7 +457,7 @@ router.get('/edit-salary/:id', async (req, res) => {
         }            
 });
 
-// Edit Schedule
+// Edit Salary
 router.patch('/edit-salary/:id', async (req, res) => {
         try{
              // Get doctor by ID

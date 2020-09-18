@@ -96,6 +96,10 @@ app.use('/hospital', hospitalRouter);
 app.use('/accounts', accountsRouter);
 
 
+app.get('/test', (req, res) => {
+    res.render('test');
+});
+
 app.get('/error-404', (req, res) => {
     res.render('error-404');
 });
