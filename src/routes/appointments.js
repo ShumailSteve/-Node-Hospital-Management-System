@@ -3,7 +3,7 @@ const router = new express.Router();
 
 const appointment = require('../models/appointment');
 const patient = require('../models/patients');
-const doctor =  require('../models/doctor');
+const doctorModel =  require('../models/doctor');
 const department = require('../models/department');
 const getDate = require("../functions/getDate");
 const getTime = require("../functions/getTime");
@@ -25,14 +25,17 @@ router.use( function( req, res, next ) {
 router.get('/',  async (req, res) => {
         try {
             //  const appointments = await appointment.findOne({}).populate('patient').exec();
-            const appointments = await appointment.find({});
+            const appointments = await appointment.find({})
+                                    .populate('patient', 'firstName lastName')
+                                    .populate('doctor', 'firstName lastName').exec();
              const len = appointments.length;
              if (!len) {
                     return res.render('appointments/appointments', {info_msg: "No Appointments available"} )
              }
+
              res.render('appointments/appointments', {appointments});
         } catch (e) {
-            res.status(500).send();
+            console.log(e);
         }
         
 });
@@ -50,9 +53,8 @@ router.get('/add-appointment',  async(req, res) => {
 
 // Get Edit Appointment Page
 router.get('/edit-appointment/:id',  async(req, res) => {
-    console.log("Called");
             const patients = await patient.find({});
-            const doctors = await doctor.find({});
+            const doctors = await doctorModel.find({});
             const departments = await department.find({});
             const appt = await appointment.findById(req.params.id);
             res.render('appointments/edit-appointment', {patients, doctors, departments, appointment: appt});
@@ -76,35 +78,51 @@ router.get('/edit-appointment/:id',  async(req, res) => {
 router.post('/add-appointment', async (req, res) => {
             // Object Destructuring
             const {patient, department, doc, appointmentDate, appointmentTime, message, status} = req.body;
-            let errors = [];
+
             // If required fields are empty
             if(!patient || !department || !doc || !appointmentDate || !appointmentTime || !status) {
                 req.flash('msg', 'Please fill all required fields');
                 res.redirect("/appointments/add-appointment");
                 return;
             }
-            const Doctor = await  doctor.findById(doc);
-            // If appointment Time is less or greater than Doctor Available hours
-           if (appointmentTime < Doctor.availableFrom  && appointmentTime > Doctor.availableTill)
-           {
-            req.flash('msg', 'Doctor not available at selected time, please select correct time');
-            res.redirect("/appointments/add-appointment");
-            return;
-           }
-           console.log("PR");
-    //  const Appointments = await appointment.find({});
-    //  // For Generating Auto-incremental id
-    //  const len = Appointments.length+1;
+            var appointmentDay = getAppointmentDay(appointmentDate);
+            const Doctor = await  doctorModel.findById(doc);
 
-    // const newAppointment = new appointment({id: len, patient, department, doctor, appointmentDate, appointmentTime, message, status});
-   
-    // try {
-    //       await newAppointment.save();
-    //       res.redirect('/appointments');
-    //  }  catch (e) {
-    //         // Internal Server Error
-    //         res.status(500).send(e);
-    // }
+            // if Appointment Day includes in Doctor Available Days
+            var isValidDay = (Doctor.availableDays.includes(appointmentDay));
+
+            // If invalid Day
+            if(isValidDay == false) {
+                 req.flash('msg', 'Doctor not available on selected day, please select correct day');
+                 res.redirect("/appointments/add-appointment");
+                 return;
+            }
+            // If appointment Time is less or greater than Doctor Available hours
+           if (appointmentTime < Doctor.availableFrom  || appointmentTime > Doctor.availableTill) {
+                req.flash('msg', 'Doctor not available at selected time, please select correct time');
+                res.redirect("/appointments/add-appointment");
+                return;
+           }
+           // If Doctor has appointment on the selected time
+           const ifAlreadyExists = await appointment.find({doctor: doc, appointmentDate, appointmentTime});
+           if(ifAlreadyExists.length !== 0) {
+                req.flash('msg', 'Doctor already has appointment on selected time, please select another time');
+                res.redirect("/appointments/add-appointment");
+                return;
+           }
+            const Appointments = await appointment.find({});
+            // For Generating Auto-incremental id
+            const len = Appointments.length+1;
+
+            const newAppointment = new appointment({id: len, patient, department, doctor: doc, appointmentDate, appointmentTime, message, status});
+        
+            try {
+                await newAppointment.save();
+                res.redirect('/appointments');
+            }  catch (e) {
+                    // Internal Server Error
+                    res.render('error-500');
+            }
 });
 
 //Edit appointment
@@ -132,7 +150,7 @@ router.patch('/:id', async (req, res) => {
                 req.body.appointmentTime = appointmentTime;
             }
                     //Obj Destructuring
-                // const {patientID, patientName, department, doctor,message, status} = req.body;
+                // const {patientID, patientName, department, doctorModel,message, status} = req.body;
             try {
                     const Appointment = await appointment.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});                                                         
                    
@@ -186,5 +204,13 @@ router.delete('/:id', async (req, res) => {
         res.status(400).send(e);
     }
 });
+
+function getAppointmentDay (appointmentDate) {
+    var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    var dayInt = new Date(appointmentDate).getDay();
+    // Convert dayInt to dayString
+    var dayString = weekdays[dayInt];
+     return dayString;
+}
 
 module.exports = router;

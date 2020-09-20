@@ -96,7 +96,7 @@ router.get('/profile/:id', async (req, res) => {
 // Get Docs by Department Name
 router.get('/department', async (req, res) => {
     try {
-        const doc = await doctor.find({department: req.query.department});
+        const doc = await doctor.find({department: req.query.department, status: "active"});
         // If no doctor with given id
         if(!doc)  return res.status(400).send("No Doctor");
         var docNames = [];
