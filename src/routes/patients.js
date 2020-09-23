@@ -70,7 +70,7 @@ router.post('/add-patient', async (req, res) => {
 
    const newPatient = new patient({id: len, firstName, lastName, age, gender, bloodGroup, disease, address, city, phone, email, status });
    let errors = [];
-   if(!firstName || !gender || !status)
+   if(!firstName || !age || !gender || !status )
    {
            errors.push({msg: "Please fill all required Fields"});
            return res.render('patients/add-patient', {errors, newPatient})

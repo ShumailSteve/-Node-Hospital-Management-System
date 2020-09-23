@@ -42,22 +42,25 @@ router.get('/',  async (req, res) => {
 
 // Get Add Appointment Page
 router.get('/add-appointment',  async(req, res) => {
-    const patients = await patient.find({});
-    const appointments = await appointment.find({});
-    const departments = await department.find({});
-    const len = appointments.length + 1;
-    let errors = [];
-    errors.push({msg: req.flash('msg')});
-    res.render('appointments/add-appointment', {id: len, patients, departments, errors});
+            const patients = await patient.find({status: "active"});
+            const appointments = await appointment.find({});
+            const departments = await department.find({status: "active"});
+            const len = appointments.length + 1;
+            let errors = [];
+            errors.push({msg: req.flash('msg')});
+            res.render('appointments/add-appointment', {id: len, patients, departments, errors});
 });
 
 // Get Edit Appointment Page
 router.get('/edit-appointment/:id',  async(req, res) => {
             const patients = await patient.find({});
-            const doctors = await doctorModel.find({});
             const departments = await department.find({});
-            const appt = await appointment.findById(req.params.id);
-            res.render('appointments/edit-appointment', {patients, doctors, departments, appointment: appt});
+            const appt = await appointment.findById(req.params.id)
+                                .populate('patient', 'id firstName lastName')
+                                .populate('doctor', 'id firstName lastName')
+                                .exec();
+            console.log(appt);
+            res.render('appointments/edit-appointment', { appointment: appt, patients, departments,});
 });
 
 // Get by ID
@@ -91,19 +94,26 @@ router.post('/add-appointment', async (req, res) => {
             // if Appointment Day includes in Doctor Available Days
             var isValidDay = (Doctor.availableDays.includes(appointmentDay));
 
-            // If invalid Day
+            // If Invalid Day
             if(isValidDay == false) {
                  req.flash('msg', 'Doctor not available on selected day, please select correct day');
                  res.redirect("/appointments/add-appointment");
                  return;
             }
-            // If appointment Time is less or greater than Doctor Available hours
-           if (appointmentTime < Doctor.availableFrom  || appointmentTime > Doctor.availableTill) {
-                req.flash('msg', 'Doctor not available at selected time, please select correct time');
-                res.redirect("/appointments/add-appointment");
-                return;
+                
+            // If appointment Time is less than Doctor's Available hours
+           if ( appointmentTime < Doctor.availableFrom) {
+                    req.flash('msg', "Selected Time is less than Doctor's Available Time");
+                    res.redirect("/appointments/add-appointment");
+                    return;
            }
-           // If Doctor has appointment on the selected time
+             // If appointment Time is greater than Doctor's Available hours
+             if ( appointmentTime > Doctor.availableTill) {
+                    req.flash('msg', "Selected Time is greater than Doctor's Available Time");
+                    res.redirect("/appointments/add-appointment");
+                    return;
+           }
+             // If Doctor has already an appointment on the selected time
            const ifAlreadyExists = await appointment.find({doctor: doc, appointmentDate, appointmentTime});
            if(ifAlreadyExists.length !== 0) {
                 req.flash('msg', 'Doctor already has appointment on selected time, please select another time');
@@ -122,7 +132,7 @@ router.post('/add-appointment', async (req, res) => {
             }  catch (e) {
                     // Internal Server Error
                     res.render('error-500');
-            }
+            } 
 });
 
 //Edit appointment

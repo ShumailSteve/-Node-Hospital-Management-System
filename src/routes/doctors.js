@@ -368,7 +368,7 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                  if(!doc) {
                      return res.render('error-404');
                  }  
-                doc.availableDays = req,body.availableDays;
+                doc.availableDays = req.body.availableDays;
                 doc.availableFrom = req.body.availableFrom;
                 doc.availableTill = req.body.availableTill;
                 await doc.save();
@@ -376,7 +376,7 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                 res.redirect(`/doctors/schedules`);
             } catch (e) {
                 // Internal Server Error
-                res.send(e);
+               console.log(e);
             }        
 });
 
