@@ -33,7 +33,7 @@ router.get('/',  async (req, res) => {
                     return res.render('appointments/appointments', {info_msg: "No Appointments available"} )
              }
 
-             res.render('appointments/appointments', {appointments});
+             res.render('appointments/appointments', {appointments, info_msg: req.flash('msg')});
         } catch (e) {
             console.log(e);
         }
@@ -53,14 +53,16 @@ router.get('/add-appointment',  async(req, res) => {
 
 // Get Edit Appointment Page
 router.get('/edit-appointment/:id',  async(req, res) => {
+            let errors = [];
             const patients = await patient.find({});
             const departments = await department.find({});
             const appt = await appointment.findById(req.params.id)
                                 .populate('patient', 'id firstName lastName')
-                                .populate('doctor', 'id firstName lastName')
+                                .populate('doctor', 'id firstName lastName availableDays availableFrom availableTill')
                                 .exec();
-            console.log(appt);
-            res.render('appointments/edit-appointment', { appointment: appt, patients, departments,});
+            const doctors = await doctorModel.find({department: appt.department});
+            errors.push({msg: req.flash('msg')});
+            res.render('appointments/edit-appointment', { appointment: appt, patients, departments, doctors, errors});
 });
 
 // Get by ID
@@ -84,14 +86,14 @@ router.post('/add-appointment', async (req, res) => {
 
             // If required fields are empty
             if(!patient || !department || !doc || !appointmentDate || !appointmentTime || !status) {
-                req.flash('msg', 'Please fill all required fields');
+                // req.flash('msg', 'Please fill all required fields');
                 res.redirect("/appointments/add-appointment");
                 return;
             }
             var appointmentDay = getAppointmentDay(appointmentDate);
             const Doctor = await  doctorModel.findById(doc);
 
-            // if Appointment Day includes in Doctor Available Days
+            // If Appointment Day includes in Doctor Available Days
             var isValidDay = (Doctor.availableDays.includes(appointmentDay));
 
             // If Invalid Day
@@ -138,44 +140,98 @@ router.post('/add-appointment', async (req, res) => {
 //Edit appointment
 router.patch('/:id', async (req, res) => {
             const updates = Object.keys(req.body);
-            const allowedUpdates = ['patientID', 'patientName', 'department', 'doctor', 'appointmentDate', 'appointmentTime', 'message', 'status'];
+            const allowedUpdates = ['patient', 'department', 'doctor', 'appointmentDate', 'appointmentTime', 'message', 'status'];
                                     
             const isValidOperation = updates.every( (update) => 
                                     allowedUpdates.includes(update));
         
-            if (!isValidOperation) {
-                return res.status(400).send({error: 'Invalid Updates!'});
+            if (!isValidOperation)  return res.redirect('/appointments');
+
+             // Object Destructuring
+             const {patient, department, doctor, appointmentDate, appointmentTime, message, status} = req.body;
+
+             // If required fields are empty
+             if(!patient || !department || !doctor || !appointmentDate || !appointmentTime || !status) {
+                    req.flash('msg', 'Please fill all required fields');
+                    res.redirect(`/appointments/edit-appointment/${req.params.id}`);
+                    return;
+             }
+             var appointmentDay = getAppointmentDay(appointmentDate);
+             const Doctor = await  doctorModel.findById(doctor);
+ 
+             // If Appointment Day includes in Doctor Available Days
+             var isValidDay = (Doctor.availableDays.includes(appointmentDay));
+ 
+             // If Invalid Day
+             if(isValidDay == false) {
+                    req.flash('msg', 'Doctor not available on selected day, please select correct day');
+                    res.redirect(`/appointments/edit-appointment/${req.params.id}`);
+                    return;
+             }
+                 
+             // If appointment Time is less than Doctor's Available hours
+            if ( appointmentTime < Doctor.availableFrom) {
+                     req.flash('msg', "Selected Time is less than Doctor's Available Time");
+                     res.redirect(`/appointments/edit-appointment/${req.params.id}`);
+                     return;
+            }
+              // If appointment Time is greater than Doctor's Available hours
+              if ( appointmentTime > Doctor.availableTill) {
+                     req.flash('msg', "Selected Time is greater than Doctor's Available Time");
+                     res.redirect(`/appointments/edit-appointment/${req.params.id}`);
+                     return;
+            }
+              // If Doctor has already an appointment on the selected time
+            const ifAlreadyExists = await appointment.find({doctor, appointmentDate, appointmentTime});
+            if(ifAlreadyExists.length !== 0) {
+                    req.flash('msg', 'Doctor already has appointment on selected time, please select another time');
+                    res.redirect(`/appointments/edit-appointment/${req.params.id}`);
+                    return;
             }
 
-            // // Parse incoming Date and Time
-            // Parse if date update required
-            if(req.body.appointmentDate)
-            {
-                const appointmentDate = getDate(req.body.appointmentDate);
-                req.body.appointmentDate = appointmentDate;
-            }
-             // Parse if time update required
-            if(req.body.appointmentTime){
-                const appointmentTime = getTime(req.body.appointmentTime);
-                req.body.appointmentTime = appointmentTime;
-            }
-                    //Obj Destructuring
-                // const {patientID, patientName, department, doctorModel,message, status} = req.body;
-            try {
+           try {
                     const Appointment = await appointment.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});                                                         
                    
                     // If no appointments in DB
                     if (!Appointment) {
-                        return res.status(404).send();
+                        return res.send('error-404');
                     }
-                    res.send(Appointment);
-            }  catch (e) {
-                //Internal Server Error
-                res.status(500).send(e);
+                    req.flash('msg', `Appointment No. ${Appointment.id} updated successfully`);
+                    res.redirect('/appointments');
+            }  catch {
+                    //Internal Server Error
+                      res.render('error-500');
+             } 
+ });
+
+
+ // Delete Single appointment
+router.delete('/:id', async (req, res) => {
+            try {
+                    const id = req.params.id;
+                    // Get num of account being deleted
+                    const Appointment = await appointment.findById(id);
+                    if (!Appointment)
+                        {
+                            // Not Found
+                            return res.render('error-404');
+                        }
+                    const AppointmentID = Appointment.id;
+                
+                    // Delete Account
+                    await appointment.findByIdAndDelete(id);                
+
+                    // Decrement nums by one of all accounts below deleted account
+                    await appointment.updateMany({"id" : {$gt: AppointmentID}}, {$inc: {id: -1}});
+                    res.redirect('/appointments');
+                    // Status 410 = Deleted
+                    // res.status(410).send();
+                } catch (e) {
+                res.status(400).send(e);
             }
 });
 
-//Delete All
+// Delete All
 router.delete('/', async (req, res) => {
     try{
          const doc = await appointment.deleteMany();
@@ -189,31 +245,6 @@ router.delete('/', async (req, res) => {
     }
  });
 
- // Delete Single appointment
-router.delete('/:id', async (req, res) => {
-    try {
-              const id = req.params.id;
-            // Get num of account being deleted
-            const Appointment = await appointment.findById(id);
-            if (!Appointment)
-                {
-                    // Not Found
-                    return res.status(404).send();
-                }
-            const AppointmentID = Appointment.id;
-           
-            // Delete Account
-            await appointment.findByIdAndDelete(id);                
-
-            // Decrement nums by one of all accounts below deleted account
-            await appointment.updateMany({"id" : {$gt: AppointmentID}}, {$inc: {id: -1}});
-            
-            // Status 410 = Deleted
-            res.status(410).send();
-        } catch (e) {
-        res.status(400).send(e);
-    }
-});
 
 function getAppointmentDay (appointmentDate) {
     var weekdays = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];

@@ -376,7 +376,7 @@ router.patch('/edit-schedule/:id', async (req, res) => {
                 res.redirect(`/doctors/schedules`);
             } catch (e) {
                 // Internal Server Error
-               console.log(e);
+               res.send('error-500');
             }        
 });
 
