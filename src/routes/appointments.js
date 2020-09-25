@@ -183,13 +183,15 @@ router.patch('/:id', async (req, res) => {
             }
               // If Doctor has already an appointment on the selected time
             const ifAlreadyExists = await appointment.find({doctor, appointmentDate, appointmentTime});
+            // If Appointment not exists 
             if(ifAlreadyExists.length !== 0) {
+                    if(ifAlreadyExists[0].doctor != doctor) {
                     req.flash('msg', 'Doctor already has appointment on selected time, please select another time');
                     res.redirect(`/appointments/edit-appointment/${req.params.id}`);
                     return;
+                    }
             }
-
-           try {
+            try {
                     const Appointment = await appointment.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});                                                         
                    
                     // If no appointments in DB
@@ -203,7 +205,6 @@ router.patch('/:id', async (req, res) => {
                       res.render('error-500');
              } 
  });
-
 
  // Delete Single appointment
 router.delete('/:id', async (req, res) => {
