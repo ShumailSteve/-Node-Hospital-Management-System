@@ -1,340 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
-
-
-<!-- edit-employee24:07-->
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-    <link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicon.ico">
-    <title>Preclinic - Medical & Hospital - Bootstrap 4 Admin Template</title>
+    <link rel="shortcut icon" type="image/x-icon" href="assets/img/favicon.ico">
+    <title>Edit Employee</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
-	<link rel="stylesheet" type="text/css" href="/assets/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/select2.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap-datetimepicker.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
-    <!--[if lt IE 9]>
-		<script src="assets/js/html5shiv.min.js"></script>
-		<script src="assets/js/respond.min.js"></script>
-	<![endif]-->
-</head>
+  </head>
 
 <body>
     <div class="main-wrapper">
-       {{>header}}
-        <div class="page-wrapper">
+        {{>header}}
+        <div class="page-wrapper">            
             <div class="content">
+                {{>messages}}
                 <div class="row">
                     <div class="col-lg-8 offset-lg-2">
                         <h4 class="page-title">Edit Employee</h4>
-                    </div>
+                     </div>
                 </div>
                 <div class="row">
+                      
                     <div class="col-lg-8 offset-lg-2">
-                        <form>
+                        <form action="/employees/{{employee._id}}?_method=PATCH" method="POST">
                             <div class="row">
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>First Name <span class="text-danger">*</span></label>
-                                        <input class="form-control" type="text">
+                                        <input class="form-control" type="text" name="firstName" value="{{employee.firstName}}">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Last Name</label>
-                                        <input class="form-control" type="text">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Username <span class="text-danger">*</span></label>
-                                        <input class="form-control" type="text">
-                                    </div>
+                                        <input class="form-control" type="text" name="lastName"  value="{{employee.lastName}}"> 
+                                   </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group">
                                         <label>Email <span class="text-danger">*</span></label>
-                                        <input class="form-control" type="email">
-                                    </div>
+                                        <input class="form-control" type="text" name="email"  value="{{employee.email}}" >
+                                 </div>
                                 </div>
                                 <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Password</label>
-                                        <input class="form-control" type="password">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Confirm Password</label>
-                                        <input class="form-control" type="password">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Employee ID <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Joining Date <span class="text-danger">*</span></label>
-                                        <div class="cal-icon">
-                                            <input class="form-control datetimepicker" type="text">
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Phone </label>
-                                        <input class="form-control" type="text">
-                                    </div>
-                                </div>
-                                <div class="col-sm-6">
-                                    <div class="form-group">
-                                        <label>Role</label>
-                                        <select class="select">
-                                            <option>Admin</option>
-                                            <option>Doctor</option>
-                                            <option>Nurse</option>
-                                            <option>Laboratorist</option>
-                                            <option>Pharmacist</option>
-                                            <option>Accountant</option>
-                                            <option>Receptionist</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="display-block">Status</label>
+                                 <div class="form-group">
+                                <label class="display-block">Gender<span class="text-danger">*</span></label>
 								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="status" id="employee_active" value="option1" checked>
-									<label class="form-check-label" for="employee_active">
-									Active
+									<input class="form-check-input" type="radio" name="gender"  value="male" checked>
+									<label class="form-check-label" for="product_active">
+									Male
 									</label>
 								</div>
 								<div class="form-check form-check-inline">
-									<input class="form-check-input" type="radio" name="status" id="employee_inactive" value="option2">
-									<label class="form-check-label" for="employee_inactive">
+									<input class="form-check-input" type="radio" name="gender"  value="female" 
+                                     {{#if_eq employee.gender 'female'}}
+                                            checked
+                                    {{/if_eq}}>
+									<label class="form-check-label" for="product_inactive">
+									Female
+									</label>
+								</div>
+                                     </div>
+                                </div>
+
+                    		<div class="col-sm-12">
+									<div class="row">
+										<div class="col-sm-12">
+											<div class="form-group">
+												<label>Address<span class="text-danger">*</span></label>
+												<input type="text" class="form-control " name="address"  value="{{employee.address}}" >
+                                            </div>
+							            </div>
+								        <div class="col-sm-6 ">
+											<div class="form-group">
+												<label>City<span class="text-danger">*</span> </label>
+												<select class="form-control select" name="city" style="width: 100px;">
+                                                   <option value={{employee.city}}>
+                                                       {{#if employee.city}}
+                                                             {{employee.city}}                                                       
+                                                        {{else}}
+                                                                Select City
+                                                         {{/if}}
+                                                    </option>
+
+													<option value="Karachi">Karachi</option>
+													<option value="Hyderabad">Hyderabad</option>
+													<option value="Lahore">Lahore</option>
+                                                    <option value="Peshawar">Peshawar</option>
+												</select>
+											</div>
+										</div>
+										  <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Phone<span class="text-danger">*</span></label>
+                                        <input class="form-control" type="text" name="phone"  value="{{employee.phone}}"> 
+                                   </div>
+                                </div>							
+										
+									</div>
+								</div>
+                                 <div class="col-sm-6 ">
+											<div class="form-group">
+												<label>Role<span class="text-danger">*</span> </label>
+												 <select class="form-control select" name="role" style="width: 150px;">
+                                                      <option value="{{employee.role}}"> 
+                                                       {{#if employee.role}}
+                                                             {{employee.role}}                                                       
+                                                        {{else}}
+                                                                Select Role
+                                                         {{/if}}
+                                                    </option> 
+                                                     <option value="Nurse">Nurse</option>
+													<option value="Receptionist">Receptionist</option>
+													<option value="Accountant">Accountant</option>
+                                                  
+                                                  {{!-- <option value={{doc.department}}> 
+                                                       {{#if doc.department}}
+                                                             {{doc.department}}                                                       
+                                                        {{else}}
+                                                                Select Role
+                                                         {{/if}}
+                                                    </option> 
+                                                    {{#each departments}}
+													<option value={{name}}>{{name}}</option>
+                                                    {{/each}} --}}
+												</select> 
+											</div>
+								</div>
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label>Joining Date</label>
+                                         <input class="form-control floating " type="date" style="width: 300px; height: 40px;" id="joiningDate"   name="joiningDate" value="{{employee.joiningDate}}" onclick="minDate(this)">
+                                    </div>
+                                </div>
+                                  <div class="col-md-12">
+									<div class="form-group">
+										<label>Available Days</label>
+										<select class="select" multiple name="dutyDays">
+											<option>Select Days</option>
+											<option
+                                                {{#if_includes employee.dutyDays 'Sunday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Sunday</option>
+											<option
+                                              {{#if_includes employee.dutyDays 'Monday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Monday</option>
+											<option
+                                              {{#if_includes employee.dutyDays 'Tuesday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Tuesday</option>
+											<option
+                                              {{#if_includes employee.dutyDays 'Wednesday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Wednesday</option>
+											<option
+                                            {{#if_includes employee.dutyDays 'Thursday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Thursday</option>
+											<option
+                                            {{#if_includes employee.dutyDays 'Friday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Friday</option>
+											<option
+                                            {{#if_includes employee.dutyDays 'Saturday'}}
+                                                    selected
+                                                {{/if_includes}}
+                                            >Saturday</option>
+										</select>
+									</div>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Start Time</label>
+                                         <input type="time" class="form-control"  name="availableFrom" value="{{employee.availableFrom}}">
+                                    </div>
+                            </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>End Time</label>
+                                            <input type="time" class="form-control"  name="availableTill" value="{{employee.availableTill}}">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row">
+                            <div class="col-sm-6">
+									<div class="form-group">
+										<label>Basic Salary<span class="text-danger">*</span></label>
+										<input class="form-control" type="number" min="0" name="basicSalary" value="{{employee.basicSalary}}">
+									</div>
+                            </div>
+                             <div class="col-sm-6">
+									<div class="form-group">
+										<label>Other Expenses<span class="text-danger">*</span></label>
+										<input class="form-control" type="number" min="0" name="otherExpenses" value="{{employee.otherExpenses}}">
+									</div>
+                            </div>
+                            </div>
+                        <div class="form-group">
+                                <label class="display-block">Status<span class="text-danger">*</span></label>
+								<div class=" form-check-inline">
+									<input class="form-check-input" type="radio" name="status" id="product_active" value="active" checked>
+									<label class="form-check-label" for="product_active">
+								    Active
+									</label>
+								</div>
+								<div class="form-check-inline">
+									<input class="form-check-input" type="radio" name="status" id="product_inactive" value="inactive" 
+                                     {{#if_eq employee.status 'inactive'}}
+                                        checked
+                                    {{/if_eq}}>
+									<label class="form-check-label" for="product_inactive">
 									Inactive
 									</label>
 								</div>
                             </div>
-                            <div class="m-t-20 text-center">
-                                <button class="btn btn-primary submit-btn">Save</button>
+                             <div class="m-t-20 text-center">
+                                <button class="btn btn-primary submit-btn">Edit Employee</button>
                             </div>
+                        </div>   
                         </form>
                     </div>
                 </div>
             </div>
-			<div class="notification-box">
-                <div class="msg-sidebar notifications msg-noti">
-                    <div class="topnav-dropdown-header">
-                        <span>Messages</span>
-                    </div>
-                    <div class="drop-scroll msg-list-scroll" id="msg_list">
-                        <ul class="list-box">
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">R</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Richard Miles </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item new-message">
-                                        <div class="list-left">
-                                            <span class="avatar">J</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">John Doe</span>
-                                            <span class="message-time">1 Aug</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">T</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Tarah Shropshire </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">M</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Mike Litorus</span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">C</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Catherine Manseau </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">D</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Domenic Houston </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">B</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Buster Wigton </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">R</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Rolland Webber </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">C</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author"> Claire Mapes </span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">M</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Melita Faucher</span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">J</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Jeffery Lalor</span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">L</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Loren Gatlin</span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                            <li>
-                                <a href="chat.html">
-                                    <div class="list-item">
-                                        <div class="list-left">
-                                            <span class="avatar">T</span>
-                                        </div>
-                                        <div class="list-body">
-                                            <span class="message-author">Tarah Shropshire</span>
-                                            <span class="message-time">12:28 AM</span>
-                                            <div class="clearfix"></div>
-                                            <span class="message-content">Lorem ipsum dolor sit amet, consectetur adipiscing</span>
-                                        </div>
-                                    </div>
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="topnav-dropdown-footer">
-                        <a href="chat.html">See all messages</a>
-                    </div>
-                </div>
-            </div>
+			
         </div>
     </div>
     <div class="sidebar-overlay" data-reff=""></div>
@@ -346,8 +247,7 @@
 	<script src="/assets/js/moment.min.js"></script>
 	<script src="/assets/js/bootstrap-datetimepicker.min.js"></script>
     <script src="/assets/js/app.js"></script>
+    <script src="/assets/js/minDate.js"></script>
 </body>
 
-
-<!-- edit-employee24:07-->
 </html>

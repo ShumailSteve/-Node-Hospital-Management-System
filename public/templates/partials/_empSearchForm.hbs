@@ -1,0 +1,38 @@
+ <form action="{{url}}" method="GET">
+                <div class="row filter-row">
+                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
+                            <label class="focus-label">Employee Name</label>
+                            <input type="text" class="form-control floating" name="name">
+                  </div>
+                 <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
+                     <div class="form-group">
+                        <label> Joined Before</label>
+                        <input class="form-control floating " type="date" name ="joinedBefore">
+                    </div>
+                </div>
+
+                 <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
+                     <div class="form-group">
+                        <label> Joined After</label>
+                        <input class="form-control floating " type="date" name ="joinedAfter">
+                    </div>
+                 </div>
+                  <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12">
+                     <div class="form-group">
+                        <label class="focus-label">Role</label>
+                            <select class="select floating" name="role">
+                                <option>Select Role</option>
+                                <option>Nurse</option>
+                                <option>Pharmacist</option>
+                                <option>Laboratorist</option>
+                                <option>Accountant</option>
+                                <option>Receptionist</option>
+                             </select>
+                 </div>
+                  </div>
+                    <div class="col-sm-6 col-md-3 col-lg-3 col-xl-2 col-12" >
+                        <button class="  focus-label btn btn-success btn-block btn-primary submit-btn"> Search</button>
+                    </div>
+             </div>
+            </form>
+                

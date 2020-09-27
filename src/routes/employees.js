@@ -1,197 +1,174 @@
 const express = require('express');
 const router = new express.Router();
-const bcrypt = require('bcryptjs');
 
 //Employee Model
-const employee = require('../models/employee');
+const Employee = require('../models/employee');
 
-// Get employees page
-router.get('', (req, res) => {
-    res.render('employees/employees');
+// FOR DELETING USING href
+router.use( function( req, res, next ) {
+    // if _method exists then set req.method 
+     if ( req.query._method == 'DELETE' ) {
+         // change the original method to DELETE Method
+         req.method = 'DELETE';
+         // set requested url
+         req.url = req.path;
+     }       
+     next(); 
+ });
+
+// Get all employees
+router.get('', async (req, res) => {
+            // If query request
+            let query = searchQuery(req);
+            const url = "/employees";
+            try{
+                const employees = await query.exec();
+                const len = employees.length;
+
+                // If no Employee
+                if (!len) {                   
+                        return res.render('employees/employees', {info_msg: "No employee available"});                   
+                }
+                res.render('employees/employees', {employees, success_msg: req.flash('msg')});            
+            } catch  {
+                // Internal Server Error
+                res.status(500).render('error-500');
+            }
 });
 
-// Add employees page
+// Get Employee Profile
+router.get('/profile/:id', async (req, res) => {
+    try {
+        const employee = await Employee.findById(req.params.id);
+        // If no employee exists with given id
+        if (!employee)  {
+                //404 = Not Found
+            return res.render('error-404');
+        }
+       res.render('employees/profile', {employee});
+    } catch (e) {
+        // Internal Server Error
+        res.render('error-500');
+    }
+});
+
+
+
+// Add employees Page
 router.get('/add-employee', (req, res) => {
+    //Find Cities
+    //Find Role
     res.render('employees/add-employee');
 });
 
 
 // Edit employees page
-router.get('/edit-employee', (req, res) => {
-    res.render('employees/edit-employee');
+router.get('/edit-employee/:id', async (req, res) => {
+            try{
+                    const employee = await Employee.findById(req.params.id);
+                    // Not found
+                    if(!employee) {
+                        return res.render('error-404');
+                    }
+                    res.render('employees/edit-employee', {employee})
+            } catch {
+                    //Internal Server Error
+                    res.render('error-500');
+            }
 });
-
-//Get Salary
-router.get('/salary', (req, res) => {
-    res.render('employees/salary');
-});
-
-//Get Add Salary
-router.get('/salary/add-salary', (req, res) => {
-    res.render('employees/add-salary');
-});
-
-//Get Edit Salary
-router.get('/salary/edit-salary', (req, res) => {
-    res.render('employees/edit-salary');
-});
-
-//Salary View
-router.get('/salary/salary-view', (req, res) => {
-    res.render('employees/salary-view');
-});
-
-
-// Get all employees
-router.get('', async (req, res) => {
-        try{
-                const employees = await employee.find({});
-                const len = employees.length;
-
-                if (!len) {
-                          return res.status(404).send();
-                }
-                res.send(employees);
-        } catch (e) {
-                res.status(404).send();
-        }
-});
-
-// Get Single Employee by ID
-router.get('/:id', async (req, res) => {
-    try {
-        const emp = await employee.findById(req.params.id);
-        if (!emp)  {
-                //status 404 = Not Found
-            return res.status(404).send();
-        }
-       res.send(emp);
-    } catch (e) {
-        // Bad Request
-        res.status(400).send(e);
-    }
-});
-
-// Get Single Employee by email and pass
-router.post('/employee', async (req, res) => {
-    try {
-        const emp = await employee.findOne({email: req.body.email});
-        if (!emp)  {
-                //status 404 = Not Found
-            return res.status(404).send("email doesn't exists");
-        }
-        const isMatch = await bcrypt.compare(req.body.pass, emp.password);
-        // If pass doesn't match
-        if(!isMatch){
-            return res.status(400).send("Incorrect Pass");
-        }
-       res.send(emp);
-    } catch (e) {
-        // Bad Request
-        res.status(400).send(e);
-    }
- 
-});
-
 
 //Add Employee
 router.post('/add-employee', async (req, res) => {
-        try{     
-            
-            const employees = await employee.find();
-           
-            // For generating ID
-            const len = employees.length + 1;
-            
-            //Parse Date
-            const joiningDate = JSON.parse(req.body.joiningDate);
-            
-            // Obj Destructuring            
-            const {firstName, lastName, username, email, password, password2, age, gender, 
-                    dutyDays, dutyTime, address, phone, educationDetails, role, status } = req.body;
-            if(password != password2){
-                return res.status(400).send("Pass mismatch");
+                 // Obj Destructuring            
+                 const {firstName, lastName, email, gender, address, city, phone, role, joiningDate, dutyDays, availableFrom, availableTill, basicSalary, otherExpenses, status } = req.body;
+
+                 const employees = await Employee.find({});
+                 // For generating ID
+                 const len = employees.length + 1;
+
+                 const newEmployee = Employee({id: len, firstName, lastName, email, gender, address, city, phone, role, joiningDate, dutyDays, availableFrom, availableTill, basicSalary, otherExpenses, status});
+                 let errors = [];
+
+                // If required Fields are empty
+                if(!firstName || !email || !gender || !address || !city || !phone || !role) {
+                        errors.push({msg: 'Please fill all required fields'});
+                       return res.render('employees/add-employee', {
+                            errors,
+                            employee: newEmployee,
+                        });
+                }
+                try{      
+                    await newEmployee.save();
+                    res.redirect('/employees');
+            } catch (e) {
+                    // Bad request
+                    res.status(400).send(e);
             }
-            //Hash Pass before saving to db
-            const hashedPass = await bcrypt.hash(password, 8);
-            const newEmployee = new employee({id: len, firstName, lastName, username, email, password: hashedPass, age, joiningDate, gender, 
-                                                dutyDays, dutyTime, address, phone, educationDetails, role, status });
-            
-            await newEmployee.save();
-            // Created
-            // res.status(201).send();
-            res.redirect('http://localhost:3000/add-salary');
-    } catch (e) {
-            // Bad request
-            res.status(400).send(e);
-    }
 });
 
 
 
 // Edit Emp
 router.patch('/:id', async (req, res) => {
-    const updates = Object.keys(req.body);
-           
-    const allowedUpdates = ['firstName', 'lastName', 'username', 'email', 'password', 'age', 'gender', 'joiningDate', 
-                            'dutyDays', 'dutyTime', 'address','phone', 'educationDetails', 'role','status'];
-                            
-    const isValidOperation = updates.every( (update) => 
-                             allowedUpdates.includes(update));
-    
-    if (!isValidOperation) {
-        return res.status(400).send({error: 'Invalid Updates!'});
-    }
-      // // Parse incoming Dates
-             // if joiningDate update required
-     if(req.body.joiningDate) {
-            const joinDate = JSON.parse(req.body.joiningDate);
-            req.body.joiningDate = joinDate;
-         }
-               
-    try {
-            const user =  await employee.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
-            if (!user) {
-               // Not Found
-               return res.status(404).send();
+            const updates = Object.keys(req.body);
+                
+            const allowedUpdates = ['firstName', 'lastName', 'email', 'gender', 'address', 'city', 'phone', 'role', 'joiningDate',
+                                    'dutyDays', 'availableFrom', 'availableTill', 'basicSalary', 'otherExpenses', 'status' ];
+                                    
+            const isValidOperation = updates.every( (update) => 
+                                    allowedUpdates.includes(update));
+            
+            if (!isValidOperation) {
+            return res.redirect('/employees');
             }
-            res.send(user);
-    }
-    catch (e) {
-        res.status(400).send(e);
-    }
+                  
+            try {
+                    const employee =  await Employee.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true});
+                    // Not Found
+                    if (!employee) {               
+                    return res.render('error-404');
+                    }
+                    req.flash('msg', `Employee ${employee.id} Edited Successfully` );
+                    res.redirect('/employees');
+            }
+            catch  {
+                //Internal Server Error
+                res.render('error-500');
+            } 
+            
 });
 
 // Delete Single Emp
 router.delete('/:id', async (req, res) => {
-    try {
-              const id = req.params.id;
-            // Get num of account being deleted
-            const doc = await employee.findById(id);
-            if (!doc)
-                {
-                    // Not Found
-                    return res.status(404).send();
-                }
-            const docNum = doc.id;
-           
-            // Delete Account
-            await employee.findByIdAndDelete(id);                
+            try {
+                    const id = req.params.id;
+                    // Get num of account being deleted
+                    const doc = await Employee.findById(id);
 
-            // Decrement nums by one of all accounts below deleted account
-            await employee.updateMany({"id" : {$gt: docNum}}, {$inc: {id: -1}});
-            
-            // Status 410 = Deleted
-            res.status(410).send();
-        } catch (e) {
-        res.status(400).send(e);
-    }
+                    // Not Found
+                    if (!doc)
+                        {
+                            return res.render('error-404');
+                        }
+                    const docNum = doc.id;
+                
+                    // Delete Account
+                    await Employee.findByIdAndDelete(id);                
+
+                    // Decrement nums by one of all accounts below deleted account
+                    await Employee.updateMany({"id" : {$gt: docNum}}, {$inc: {id: -1}});
+                    
+                    req.flash('msg', "Delete Successfully");
+                    res.redirect('/employees');
+                } catch (e) {
+                        console.log(e);
+            }
 });
 
 //Delete All Employees
 router.delete('/', async (req, res) => {
         try {
-            const doc = await employee.deleteMany();     
+            const doc = await Employee.deleteMany();     
             // if db is empty
             if (doc.deletedCount == 0)
             {
@@ -203,10 +180,35 @@ router.delete('/', async (req, res) => {
         } catch(e) {
             res.status(500).send(e); 
         } 
- });
+ }); 
 
 
+//  SALARY
+router.get('/salary', async (req, res) => {
+                const employees = await Employee.find({});
+                if(!employees) {
+                    return res.render('employees/salary', {info_msg: "No Employees Available"});
+                }
+                res.render('employees/salary', {employees});
+});
 
+
+function searchQuery(req) {
+            let query =  Employee.find();
+            if(req.query.name != null && req.query.name !== "") {
+                query = query.regex('firstName', new RegExp(req.query.name, 'i'));
+            }
+            if(req.query.joinedBefore != null && req.query.joinedBefore !== "") {
+                query = query.lte('joiningDate', req.query.joinedBefore );
+            }
+            if(req.query.joinedAfter != null && req.query.joinedAfter !== "") {
+                query = query.gte('joiningDate', req.query.joinedAfter );
+            }
+            if(req.query.role != null && req.query.role !== "" && req.query.role !== "Select Role") {
+                query = query.regex('role', new RegExp(req.query.role));
+            }
+           return query;
+} 
 
 module.exports = router;
 

@@ -5,7 +5,6 @@ const router = new express.Router();
 const doctor = require('../models/doctor');
 const department = require('../models/department');
 const multer = require('multer');
-const { time } = require('console');
 
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
@@ -62,6 +61,7 @@ router.get('/add-doctor', async (req, res) => {
 
 //Get all Doctors 
 router.get('', async (req, res) => {
+        // If query request
         let query = searchQuery(req);
         const url = "/doctors";
         try{
@@ -73,7 +73,7 @@ router.get('', async (req, res) => {
                     return res.render('doctors/doctors', {info_msg: "No doctors available"});                   
             }
             res.render('doctors/doctors', {doctors, success_msg: req.flash('msg')});            
-        } catch (e) {
+        } catch  {
             // Internal Server Error
             res.status(500).render('error-500');
         }
@@ -159,7 +159,6 @@ router.post('/add-doctor', upload.single('img'), async (req, res) => {
             req.flash('msg', 'New Doctor added, kindly add schedule');
             res.redirect(`/doctors/add-schedule/${newDoctor._id}`);
          }  catch (e) {
-                console.log(e);
           // If Email Already Exists
                 if(e.keyPattern.email){
                             errors.push({msg: 'Email already exists'});

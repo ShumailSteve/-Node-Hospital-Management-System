@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+    <link rel="shortcut icon" type="image/x-icon" href="ssets/img/favicon.ico">
+    <title>Employee Profile</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="/assets/css/style.css">
+
+</head>
+
+<body>
+    <div class="main-wrapper">
+ {{>header}}
+        <div class="page-wrapper">
+             
+            <div class="content">
+               
+                <div class="row">
+                    {{>messages}}
+                    <div class="col-sm-7 col-6">
+                        <h4 class="page-title">Employee Profile</h4>
+                   </div>
+
+                    <div class="col-sm-5 col-6 text-right m-b-30">
+                        <a href="/employees/edit-employee/{{employee._id}}" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Edit Profile</a>
+                    </div>
+                </div>
+                  
+                <div class="card-box profile-header">
+                  
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="profile-view">
+                                <div class="profile-basic">
+                                    <div class="row">
+                                        <div class="col-md-5">
+                                            <div class="profile-info-left">
+                                                <h3 class="user-name m-t-0 mb-0">{{employee.firstName}} &nbsp;{{employee.lastName}}</h3>
+                                                
+                                                <div class="staff-id">Employee ID : DR-0{{employee.id}}</div>
+                                                
+                                            </div>
+                                        </div>
+                                        <div class="col-md-7">
+                                            <ul class="personal-info">
+                                                <li>
+                                                    <span class="title">Phone:</span>
+                                                    <span class="text">{{employee.phone}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Email:</span>
+                                                    <span class="text">{{employee.email}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Address:</span>
+                                                    <span class="text">{{employee.address}}, {{employee.city}}, {{doc.country}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Gender:</span>
+                                                    <span class="text">{{employee.gender}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Joining Date</span>
+                                                    <span class="text">{{employee.joiningDate}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Duty Days</span>
+                                                    <span class="text">{{employee.dutyDays}}</span>
+                                                </li>
+                                               <li>
+                                                    <span class="title">Available From</span>
+                                                    <span class="text">{{employee.availableFrom}}</span>
+                                                </li>
+                                                 <li>
+                                                    <span class="title">Available Till</span>
+                                                    <span class="text">{{employee.availableTill}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Basic Salary</span>
+                                                    <span class="text">${{employee.basicSalary}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">other Expenses</span>
+                                                    <span class="text">${{employee.otherExpenses}}</span>
+                                                </li>
+                                                <li>
+                                                    <span class="title">Status</span>
+                                                    <span class="text">{{employee.status}}</span>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                        
+                        </div>
+                    </div>
+                    
+                </div>
+           
+        </div>
+    </div>
+    <div class="sidebar-overlay" data-reff=""></div>
+    <script src="/assets/js/jquery-3.2.1.min.js"></script>
+	<script src="/assets/js/popper.min.js"></script>
+    <script src="/assets/js/bootstrap.min.js"></script>
+    <script src="/assets/js/jquery.slimscroll.js"></script>
+    <script src="/assets/js/app.js"></script>
+</body>
+
+</html>
