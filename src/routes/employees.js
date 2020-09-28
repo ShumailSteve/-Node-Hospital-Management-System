@@ -185,12 +185,32 @@ router.delete('/', async (req, res) => {
 
 //  SALARY
 router.get('/salary', async (req, res) => {
-                const employees = await Employee.find({});
+                let query = searchQuery(req);
+                let url = '/employees/salary'
+                const employees = await query.exec();
                 if(!employees) {
                     return res.render('employees/salary', {info_msg: "No Employees Available"});
                 }
                 res.render('employees/salary', {employees});
 });
+
+router.get('/salary/:id', async (req, res) => {
+            const employee = await Employee.findById(req.params.id);
+
+            // Not Found
+            if(!employee) {
+                return res.render('error-404');
+            }
+            const date = new Date();
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+            ];
+            const month = monthNames[date.getMonth()];
+            const year = new Date().getFullYear();
+            const totalSalary = employee.basicSalary + employee.otherExpenses;
+            res.render('employees/salary-view', {employee, month, year, totalSalary});
+});
+
 
 
 function searchQuery(req) {

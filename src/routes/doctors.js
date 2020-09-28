@@ -399,6 +399,23 @@ router.get('/salary', async (req, res) => {
    }  
 });
 
+// Generate Salary Slip
+router.get('/salary/:id', async (req, res) => {
+            const Doctor = await doctor.findById(req.params.id);
+            // Not Found
+            if(!Doctor) {
+                return res.render('error-404');
+            }
+            const date = new Date();
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+            ];
+            const month = monthNames[date.getMonth()];
+            const year = new Date().getFullYear();
+            res.render('doctors/salary-view', {Doctor, month, year});
+}); 
+
+
 // Add Salary by Doc _id
 router.get('/add-salary/:id', async(req, res) => {
         try{
@@ -517,16 +534,6 @@ function searchQuery (req) {
 
 
 module.exports = router;
-
-// const getDocs =  async () => {
-//     const docs = await doctor.find({department: "Cancer"});
-//     console.log(docs);
-//     console.log("END");
-// };
-
-// module.exports = getDocs;
-
-
 
 
 
