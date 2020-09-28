@@ -4,16 +4,19 @@ var wardSchema = mongoose.Schema({
     wardID :        {type: Number, required: true, unique: true},
     wardName:    {type: String, required: true, trim: true },
     bedCapacity : {type: Number, default: 0},
+    bedsOccupied: {type: Number, default: 0},
     beds : [{
-        bedID :        {type: Number, required: true},
-        patientName:    {type: String, trim: true},
-        attendentName: {type: String, trim: true},
-        allotedFrom: {type: Date},
-        bedstatus: {
-            type: String,
-            default: "free",
-            enum: ["occupied", "free"]
-         }   
+            bedID :        {type: Number},
+            patient:    {   type: mongoose.Schema.Types.ObjectId,
+                             ref: 'patient'       
+            },
+            attendentName: {type: String, trim: true},
+            allotedFrom: {type: String},
+            bedstatus: {
+                type: String,
+                default: "free",
+                enum: ["occupied", "free"]
+            }   
     }],
     wardStatus: {
         type: String,

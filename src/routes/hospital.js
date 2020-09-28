@@ -1,65 +1,50 @@
 const express = require('express');
 const router = new express.Router();
-const ward = require('../models/ward');
+const Ward = require('../models/ward');
 const room = require('../models/room');
 const asset = require('../models/asset');
 
+// FOR DELETING USING href
+router.use( function( req, res, next ) {
+    // if _method exists then set req.method 
+     if ( req.query._method == 'DELETE' ) {
+         // change the original method to DELETE Method
+         req.method = 'DELETE';
+         // set requested url
+         req.url = req.path;
+     }       
+     next(); 
+ });
 
-router.get('/wards', (req, res) => {
-    res.render('hospital/wards');
+
+//WARDS
+
+router.get('/wards', async (req, res) => {
+            const wards = await Ward.find({});
+            // If no ward
+            if(wards.length == 0) {
+                return res.render('hospital/wards/wards', { info_msg: 'No Ward Available'});
+            }
+             res.render('hospital/wards/wards', {wards, info_msg: req.flash('msg')});
 });
 
-router.get('/wards/add-ward', (req, res) => {
-    res.render('hospital/add-ward');
+// Add new Ward Page
+router.get('/wards/add-ward',async  (req, res) => {
+            const wards = await Ward.find({});
+            res.render('hospital/wards/add-ward');
 });
-
-router.get('/wards/edit-ward', (req, res) => {
-    res.render('hospital/edit-ward');
-});
-
-router.get('/ward-details', (req, res) => {
-    res.render('hospital/ward-details');
-});
-
-
-router.get('/allot-bed', (req, res) => {
-    res.render('hospital/allot-bed');
-});
-
-router.get('/wards/edit-bed', (req, res) => {
-    res.render('hospital/edit-bed');
-});
-
-router.get('/wards/edit-ward', (req, res) => {
-    res.render('hospital/edit-ward');
-});
-
-
-// Get wards list
-// router.get('/wards', async (req, res) => {
-//     try{
-//         const wards = await ward.find({});
-//         const len = wards.length;
-//         if (!len) {
-//             return res.status(404).send()
-//         }
-//         res.render('wards');
-//         // res.send(wards);
-//     } catch (e) {
-//         // Internal Server Error
-//         res.status(500).send();
-//     }
-// });
 
 //Get Ward by ID
 router.get('/wards/:id', async (req, res) => {
     try{
-        const doc = await ward.findById(req.params.id)
+        const ward = await Ward.findById(req.params.id);
+     
         // If No ward exists with given id
-        if (!doc) {
+        if (!ward) {
             return res.status(404).send();
         }
-        res.send(doc);
+        const beds = ward.beds;
+        
     } catch (e) {
         // Bad request
         res.status(400).send(e);
@@ -69,113 +54,131 @@ router.get('/wards/:id', async (req, res) => {
 // Add ward 
 router.post('/wards', async (req, res) => {
         try{
-            const wards = await ward.find({});
-            // Already existing wards count for generating wardID
-            const len = wards.length+1;
+            const wards = await Ward.find({});
+
+            const len = wards.length;
 
            // Obj Destructuring
             const {wardName, bedCapacity, wardStatus } = req.body;
-                        
-            const newWard = new ward({wardID: len, wardName, bedCapacity, wardStatus });
-           
+            
+            // Already existing wards count for generating wardID                        
+            const newWard = new Ward({wardID: len+1, wardName, bedCapacity, wardStatus });
+            let errors = [];
+            if (!wardName || !bedCapacity || !wardStatus) {
+                errors.push({msg: "Please fill all required fields"});
+                return res.render('hospital/wards/add-ward', {newWard, errors})
+            }
             var ID = 1;
             // Run loop (bedCapacity) times
             for (i=0; i < bedCapacity; i++) {
                     // Push bedID = ID to beds array and increments 
                     newWard.beds.push({"bedID": ID++});
                 }       
-            // Save newWard to ward collection
-            await newWard.save();
-            res.status(201).send("Ward Saved");
-        } catch(e) {
-            console.log(e);
-        res.status(400).send(e);
-    }
-        
+               await newWard.save();
+            req.flash('msg', `Ward No. ${newWard.wardID} added successfully`);
+            res.redirect('/hospital/wards');
+        } catch {
+            //Internal Server Error
+            res.render('error-500'); 
+    }        
+});
+
+// Get edit ward Page by ID
+router.get('/wards/edit-ward/:id', async (req, res) => {
+            const ward = await Ward.findById(req.params.id);
+            const {_id, wardName, bedCapacity, wardStatus} = ward;
+             res.render('hospital/wards/edit-ward', {_id, wardName, bedCapacity, wardStatus});
 });
 
 
 //Edit ward
 router.patch('/wards/:id', async (req, res) => {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['wardName', 'bedCapacity', 'wardStatus'];
-                            
-    const isValidOperation = updates.every( (update) => 
-                            allowedUpdates.includes(update));
+            const updates = Object.keys(req.body);
+            const allowedUpdates = ['wardName', 'bedCapacity', 'wardStatus'];
+                                    
+            const isValidOperation = updates.every( (update) => 
+                                    allowedUpdates.includes(update));
 
-    if (!isValidOperation) {
-        return res.status(400).send({error: 'Invalid Updates!'});
-    }
-    const {wardName, bedCapacity, wardStatus} = req.body;
-    try {
-            const doc = await ward.findById(req.params.id); 
+            // If any invalid update is requested
+            if (!isValidOperation) {
+                return res.redirect('/hospitals/wards');
+            }
 
-        // If bedCapacity update required 
-        if(bedCapacity || bedCapacity == 0 ) 
-        {
-                 // Current bed Capacity
-            var currentCap = doc.bedCapacity;
-        
-             // If bedCapacity is increased in update                                                        
-           if(doc.bedCapacity < bedCapacity)
-           {    
-                                // No. of Beds to increase
-               const inc = bedCapacity - currentCap;
-              
-               // Add new Beds
-               for (i=0; i < inc; i++) {
+            const {wardName, bedCapacity, wardStatus} = req.body;
+            try {
+                    const ward = await Ward.findById(req.params.id); 
 
-                   // Push bedID = ID to beds array and increments 
-                    doc.beds.push({"bedID": ++currentCap});
-                 }   
-           }
-           else{
-                 // No. of Beds to decrease
-               const dec = currentCap - bedCapacity;
-                              
-               // Delete beds from array
-               for (i=0; i < dec; i++) {
-                // Removes last elements from array
-                doc.beds.pop();
-                 }   
-           }
-        }
-           doc.wardName = wardName;
-           doc.bedCapacity = bedCapacity;
-           doc.wardStatus = wardStatus;
-           await doc.save(); 
-           res.send(doc);
-            
-    }  catch (e) {
-        //Internal Server Error
-        res.status(400).send(e);
-    }
+                // If bedCapacity update required 
+                if(bedCapacity || bedCapacity == 0 )  {
+                        // Current bed Capacity
+                    var currentCap = ward.bedCapacity;
+                
+                    // If bedCapacity is increased in update                                                        
+                    if(ward.bedCapacity < bedCapacity)  {   
+
+                        // No. of Beds to increase
+                        const inc = bedCapacity - currentCap;
+                        
+                        // Add new Beds
+                        for (i=0; i < inc; i++) {
+
+                            // Push bedID = ID to beds array and increments 
+                            ward.beds.push({"bedID": ++currentCap});
+                            }   
+                    }
+                    else {
+                        // No. of Beds to decrease
+                        const dec = currentCap - bedCapacity;
+                                        
+                        // Delete beds from array
+                        for (i=0; i < dec; i++) {
+                            // Removes last elements from array
+                            ward.beds.pop();
+                            }   
+                     }
+                }
+                ward.wardName = wardName;
+                ward.bedCapacity = bedCapacity;
+                ward.wardStatus = wardStatus;
+                await ward.save(); 
+                req.flash('msg', `Ward no. ${ward.wardID} update successfully`);
+                res.redirect('/hospital/wards');                    
+            }  catch {
+                //Internal Server Error
+                res.render('error-500');
+            } 
 });
+
+
+
 
 // Delete by id
 router.delete('/wards/:id', async (req, res) => {
-    try {
-              const id = req.params.id;
-            // Get num of account being deleted
-            const doc = await ward.findById(id);
-            if (!doc)
-                {
-                    // Not Found
-                    return res.status(404).send();
-                }
-            const docNum = doc.wardID;
-           
-            // Delete Account
-            await ward.findByIdAndDelete(id);                
+            try {
+                    const id = req.params.id;
 
-            // Decrement nums by one of all accounts below deleted account
-            await ward.updateMany({"wardID" : {$gt: docNum}}, {$inc: {wardID: -1}});
-            
-            // Status 410 = Deleted
-            res.status(410).send();
-        } catch (e) {
-        res.status(400).send(e);
-    }
+                    // Find ward to be deleted
+                    const ward = await Ward.findById(id);
+                    // Not Found
+                    if (!ward)
+                        {
+                            return res.render('error-404');
+                        }
+                    // ID of ward to be deleted   
+                    const wardNum = ward.wardID;
+                
+                    // Delete Ward
+                    await Ward.findByIdAndDelete(id);                
+
+                    // Decrement ids by one of all wards below deleted ward
+                    await Ward.updateMany({"wardID" : {$gt: wardNum}}, {$inc: {wardID: -1}});
+
+                    req.flash('msg', "Ward Deleted Successfully");
+                    res.redirect('/hospital/wards');
+                } catch {
+                    //Internal Server Error
+                    res.render('error-500');
+            }
 });
 
 // Delete All Wards
@@ -194,6 +197,22 @@ router.delete('/wards', async (req, res) => {
         res.status(500).send(e); 
     } 
 });
+
+//BEDS
+
+
+router.get('/allot-bed', (req, res) => {
+    res.render('hospital/wards/allot-bed');
+});
+
+router.get('/wards/edit-bed', (req, res) => {
+    res.render('hospital/edit-bed');
+});
+
+router.get('/wards/edit-ward', (req, res) => {
+    res.render('hospital/edit-ward');
+});
+
 
 // Get Beds that are free of specific Waard (TO BE DONE)
 router.get('/allot-bed/:id', async (req, res) => {
