@@ -5,7 +5,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
     <link rel="shortcut icon" type="image/x-icon" href="/assets/img/favicon.ico">
-    <title>Wards</title>
+    <title>Wards Details</title>
     <link rel="stylesheet" type="text/css" href="/assets/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/dataTables.bootstrap4.min.css">
     <link rel="stylesheet" type="text/css" href="/assets/css/font-awesome.min.css">
@@ -17,13 +17,18 @@
         {{>header}}
         <div class="page-wrapper">         
             <div class="content">
-                   {{>messages}}
+                {{>messages}}
                 <div class="row">
                     <div class="col-sm-5 col-5">
-                        <h4 class="page-title">Wards</h4>
+                        <h5 class="page-title"><strong>Details</strong> </h5>
+                          <h5>Ward No: {{wardID}}</h5>
+                        <h5>Ward Name: {{wardName}}</h5>
+                        <h5>Beds Capacity: {{bedCapacity}}</h5>
+                        <h5>Beds Available: {{bedsAvailable}}</h5>
+                        <h5>Beds Occupied: {{bedsOccupied}}</h5>                        
                     </div>
                     <div class="col-sm-7 col-7 text-right m-b-30">
-                        <a href="/hospital/wards/add-ward" class="btn btn-primary btn-rounded"><i class="fa fa-plus"></i> Add Ward</a>
+                        <a href="/hospital/allot-bed" class="btn btn-primary btn-rounded">Allot Bed</a>
                     </div>
                 </div>
                 <div class="row">
@@ -32,40 +37,41 @@
                             <table class="table table-striped custom-table mb-0 datatable">
                                 <thead>
                                     <tr>
-                                        <th>Ward No.</th>
-                                        <th>Ward Name</th>
-                                        <th>Beds Capacity</th>
-                                        <th>Beds Available</th>
-                                        <th>Beds Occupied</th>
+                                        <th>Bed No.</th>
+                                        <th>Patient Name</th>
+                                        <th>Attendent Name</th>
+                                        <th>Alloted From</th>
                                         <th>Status</th>
                                         <th class="text-right">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {{#each wards}}
+                                {{#each beds}}
                                     <tr>
-                                        <td><a href="/hospital/wards/{{_id}}">Wd-0{{wardID}}</a></td>
-                                        <td>{{wardName}}</td>
-                                        <td >{{bedCapacity}}</td>
-                                          <td >{{bedsAvailable}}</td>
-                                        <td>{{bedsOccupied}}</td>
-
-                                        {{#if_eq wardStatus "active"}}
-										    <td><span class="custom-badge status-green">{{wardStatus}}</span></td>
+                                        <td>Bed-{{bedID}}</td>
+                                        <td><a href="/patients/profile/{{patient._id}}">{{patient.firstName}} {{patient.lastName}}</a></td>
+                                        <td >{{attendentName}}</td>
+                                        <td>{{allotedFrom}}</td>
+                                        {{#if_eq bedstatus "free"}}
+										    <td><span class="custom-badge status-green">{{bedstatus}}</span></td>
                                         {{/if_eq}}
 
-                                        {{#if_eq wardStatus "inactive"}}
-										    <td><span class="custom-badge status-red">{{wardStatus}}</span></td>
+                                        {{#if_eq bedstatus "occupied"}}
+										    <td><span class="custom-badge status-red">{{bedstatus}}</span></td>
                                         {{/if_eq}}
-                                      
+										
                                         <td class="text-right">
-                                            <div class="dropdown dropdown-action">
+                                            <form action="/hospital/deallocate-bed/{{_id}}/{{bedID}}" method="POST"> 
+                                                          <button class="btn btn-danger btn-sm"  type="submit">Deallocate Bed</button>
+                                            </form> 
+                                           <!-- <div class="dropdown dropdown-action">
                                                 <a href="#" class="action-icon dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-ellipsis-v"></i></a>
                                                 <div class="dropdown-menu dropdown-menu-right">
-                                                    <a class="dropdown-item" href="/hospital/wards/edit-ward/{{_id}}"><i class="fa fa-pencil m-r-5"></i> Edit</a>
-                                                    <a class="dropdown-item" href="/hospital/wards/{{_id}}?_method=DELETE" ><i class="fa fa-trash-o m-r-5"></i> Delete</a>
-                                                </div>
+                                                       <form action="/hospital/deallocate-bed/{{_id}}/{{bedID}}" method="POST"> 
+                                                          <button class="btn btn-danger" btn-sm  type="submit">Deallocate Bed</button>
+                                                      </form>   
                                             </div>
+                                            -->
                                         </td>
                                     </tr>
                                 {{/each}}

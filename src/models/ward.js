@@ -4,6 +4,7 @@ var wardSchema = mongoose.Schema({
     wardID :        {type: Number, required: true, unique: true},
     wardName:    {type: String, required: true, trim: true },
     bedCapacity : {type: Number, default: 0},
+    bedsAvailable : {type: Number, default: 0},
     bedsOccupied: {type: Number, default: 0},
     beds : [{
             bedID :        {type: Number},

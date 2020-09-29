@@ -86,7 +86,7 @@ router.post('/add-appointment', async (req, res) => {
 
             // If required fields are empty
             if(!patient || !department || !doc || !appointmentDate || !appointmentTime || !status) {
-                // req.flash('msg', 'Please fill all required fields');
+                req.flash('msg', 'Please fill all required fields');
                 res.redirect("/appointments/add-appointment");
                 return;
             }

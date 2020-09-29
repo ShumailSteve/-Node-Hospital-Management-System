@@ -3,6 +3,7 @@ const router = new express.Router();
 const Ward = require('../models/ward');
 const room = require('../models/room');
 const asset = require('../models/asset');
+const Patient = require('../models/patients');
 
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
@@ -36,19 +37,33 @@ router.get('/wards/add-ward',async  (req, res) => {
 
 //Get Ward by ID
 router.get('/wards/:id', async (req, res) => {
-    try{
-        const ward = await Ward.findById(req.params.id);
-     
-        // If No ward exists with given id
-        if (!ward) {
-            return res.status(404).send();
-        }
-        const beds = ward.beds;
-        
-    } catch (e) {
-        // Bad request
-        res.status(400).send(e);
-    }
+            try{   
+                // Find Ward and Populate patient in beds array  
+                const ward = await Ward.findById(req.params.id).
+                                    populate( { 
+                                                path : 'beds', 
+                                                // Populate patient and select _id, firstName, and lastName
+                                                populate: {path: 'patient', select: 'firstName lastName'}
+                                     });
+            
+                // If No ward exists with given id
+                if (!ward) {
+                    return res.render('error-404');
+                }
+                const beds = ward.beds;
+                res.render('hospital/wards/ward-details', {
+                                                        beds,
+                                                        wardID: ward.wardID,
+                                                        wardName: ward.wardName,
+                                                        bedCapacity: ward.bedCapacity,
+                                                        bedsAvailable: ward.bedsAvailable,
+                                                        bedsOccupied: ward.bedsOccupied,
+                                                        info_msg: req.flash('msg')
+                                                    });                
+            } catch {
+                    //Internal Server Error
+                    res.render('error-500');
+            }
 });
 
 // Add ward 
@@ -62,7 +77,7 @@ router.post('/wards', async (req, res) => {
             const {wardName, bedCapacity, wardStatus } = req.body;
             
             // Already existing wards count for generating wardID                        
-            const newWard = new Ward({wardID: len+1, wardName, bedCapacity, wardStatus });
+            const newWard = new Ward({wardID: len+1, wardName, bedCapacity, wardStatus, bedsAvailable: bedCapacity });
             let errors = [];
             if (!wardName || !bedCapacity || !wardStatus) {
                 errors.push({msg: "Please fill all required fields"});
@@ -77,7 +92,7 @@ router.post('/wards', async (req, res) => {
                await newWard.save();
             req.flash('msg', `Ward No. ${newWard.wardID} added successfully`);
             res.redirect('/hospital/wards');
-        } catch {
+        } catch  {
             //Internal Server Error
             res.render('error-500'); 
     }        
@@ -136,10 +151,14 @@ router.patch('/wards/:id', async (req, res) => {
                             ward.beds.pop();
                             }   
                      }
+                     // Update Number of beds Available
+                     ward.bedsAvailable = bedCapacity - ward.bedsOccupied; 
+
                 }
                 ward.wardName = wardName;
                 ward.bedCapacity = bedCapacity;
                 ward.wardStatus = wardStatus;
+               
                 await ward.save(); 
                 req.flash('msg', `Ward no. ${ward.wardID} update successfully`);
                 res.redirect('/hospital/wards');                    
@@ -200,77 +219,109 @@ router.delete('/wards', async (req, res) => {
 
 //BEDS
 
-
-router.get('/allot-bed', (req, res) => {
-    res.render('hospital/wards/allot-bed');
+// Allot Bed to patient 
+router.get('/allot-bed', async (req, res) => {
+            // Find all patients that are active
+            const patients = await Patient.find({status: "active"});
+              // Find all wards that are active
+            const wards = await Ward.find({wardStatus: "active"});
+            res.render('hospital/wards/allot-bed', {patients, wards});
 });
 
-router.get('/wards/edit-bed', (req, res) => {
-    res.render('hospital/edit-bed');
-});
+// Get Beds that are free of specific Waard 
+router.get('/ward/beds', async (req, res) => {
+            try {
+                // const ward = await Ward.findById(req.query.wardID);
+                const ward = await Ward.find({_id: req.query.wardID, wardStatus: "active"});
 
-router.get('/wards/edit-ward', (req, res) => {
-    res.render('hospital/edit-ward');
-});
+                // If no Ward with given id
+                if(!ward)  return res.status(400).send("No Ward");
 
+                // Get Array of Beds of ward
+                var Beds = ward[0].beds;
+         
+                // Arrays of bed ids to send as a result 
+                var bedIDs = [];
 
-// Get Beds that are free of specific Waard (TO BE DONE)
-router.get('/allot-bed/:id', async (req, res) => {
-        // try {
-        //             const Ward = await ward.findById(req.params.id);
-        //             const WardID = Ward.wardID;
-        //             let Beds = [];
-        //             Ward.beds.forEach( bed => {
-        //                 if(bed.bedstatus === "free")
-        //                 {
-        //                     Beds.push(bed);
-        //                 }
-        //             });
-        //         // const Wards = await ward.find({});
+                // push name of each doctor
+                Beds.forEach( bed => { 
+                                    if(bed.bedstatus == "free") {
+                                        bedIDs.push(bed.bedID);
+                                    }                                   
+                });
+                    res.send({bedIDs});
+                } catch {
+                    //Internal Server Error
+                    res.send({Error: "Error"});
+                } 
                 
-        //         // Wards.forEach(ward =>  {
-        //         //         console.log(ward.wardID);
-        //         //         ward.beds.forEach(bed => {
-        //         //             if(bed.bedstatus === "free")
-        //         //             {
-        //         //                 console.log(bed);
-        //         //             }
-        //         //         })    
-        //         //  });
-        //         res.send({WardID, Beds});
-        // } catch (e) {
-        //     res.status(500).send(e);
-        // }
-        res.render('hospital/allot-bed');
 });
 
-// Allot bed to patient (TO BE DONE)
+// Allot bed to patient 
 router.post('/allot-bed', async (req, res) => {
             try{    
                     // Get Ward by wardID
-                    const Ward = await ward.findOne({wardID: req.body.wardID});
+                    const ward = await Ward.findById(req.body.ward);
                    
                     // TO access beds by Array Index
                     const bedIndex = req.body.bedID - 1;
+                
+                    // // Update bedStatus 
+                    ward.beds[bedIndex].bedstatus = "occupied";
+                    ward.beds[bedIndex].patient = req.body.patient;
+                    ward.beds[bedIndex].attendentName = req.body.attendentName;
+                    ward.beds[bedIndex].allotedFrom = req.body.allotedFrom;
+                    
+                    //Decrement bedsAvailable by 1
+                    ward.bedsAvailable--;
 
-                    // Update bedStatus 
-                    Ward.beds[bedIndex].bedstatus = "occupied";
-                    Ward.beds.patientID = req.body.patientID;
-                    Ward.beds.patientName = req.body.patientName;
-                    Ward.beds.attendentName = req.body.attendentName;                    
+                    // Increment 1 in bedsOccupied
+                    ward.bedsOccupied++;
+     
+                    await ward.save();
+                    req.flash('msg', `Bed No. ${bedIndex+1} allotted successfully`);
+                    res.redirect(`/hospital/wards/${ward._id}`);              
                    
-                    // find returns first bed that matches the bedID
-                    // const Bed =  Ward.beds.find( ({bedID}) => bedID === req.body.bedID);
-                    // Ward.beds[Bed.bedID].bedstatus = "occupied"  ;
-                    Ward.save();
-                    res.send(Ward);                 
-                   
-              } catch (e) {
-                // Not Found
-                res.status(404).send();
+              } catch {
+                // If ward not found
+                res.render('error-404');
             }
 });
 
+
+// Deallocated Bed
+router.post('/deallocate-bed/:bed_id/:bedID', async (req, res) => {
+         try{    
+            // Get Ward by wardID
+            const ward = await Ward.find({'beds._id': req.params.bed_id});
+           
+            // TO access beds by Array Index
+            const bedIndex = req.params.bedID - 1;
+
+            // If bed to deallocate is occupied 
+            if (ward[0].beds[bedIndex].bedstatus == "occupied") {
+                // Deallocate bed 
+                    ward[0].beds[bedIndex].bedstatus = "free";
+                    ward[0].beds[bedIndex].patient = null;
+                    ward[0].beds[bedIndex].attendentName = null;
+                    ward[0].beds[bedIndex].allotedFrom = null;
+                    
+                    //Increment bedsAvailable by 1
+                    ward[0].bedsAvailable++;
+
+                    // Decrement bedsOccupied by 1 
+                    ward[0].bedsOccupied--;
+
+                    await ward[0].save();
+                    req.flash('msg', `Bed No. ${bedIndex+1} deallocated successfully`);
+            }
+            res.redirect(`/hospital/wards/${ward[0]._id}`);               
+           
+      } catch {
+        // If ward not found
+        res.render('error-404');
+    } 
+});
 // ROOMS 
 
 // Add room 
