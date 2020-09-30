@@ -1,7 +1,7 @@
 const express = require('express');
 const router = new express.Router();
 const Ward = require('../models/ward');
-const room = require('../models/room');
+const Room = require('../models/room');
 const asset = require('../models/asset');
 const Patient = require('../models/patients');
 
@@ -322,156 +322,138 @@ router.post('/deallocate-bed/:bed_id/:bedID', async (req, res) => {
         res.render('error-404');
     } 
 });
+
 // ROOMS 
 
-// Add room 
-router.post('/add-room', async (req, res) => {
-        try{
-            const rooms = await room.find({});
-            // Already existing rooms count for generating Room ID
-            const len = rooms.length+1;
-
-           // Obj Destructuring
-            const {type, details, status, patientID, patientName, attendentName} = req.body;
-                        
-            const newRoom = new room({id: len, type, details, status, patientID, patientName, attendentName});
-           // Save new Room to DB
-            await newRoom.save();
-            res.status(201).send("Room Saved");
-        } catch(e) {
-            console.log(e);
-        res.status(400).send(e);
-    }
-}); 
-
-// Get Rooms List
+// Get all Rooms
 router.get('/rooms', async (req, res) => {
-    // try{
-    //     const rooms = await room.find({});
-    //     const len = rooms.length;
-    //     if (!len) {
-    //         return res.status(404).send()
-    //     }
-    //     res.send(rooms);
-    // } catch (e) {
-    //     // Internal Server Error
-    //     res.status(500).send();
-    // }
-    res.render('hospital/rooms');
-    
+            try{
+                const rooms = await Room.find({}).populate('patient', '_id firstName lastName').exec();
+                const len = rooms.length;
+
+                //If No Room
+                if (!len) {
+                    res.render('hospital/rooms/rooms', {info_msg: "No rooms available"});
+                }
+
+                res.render('hospital/rooms/rooms', {rooms, info_msg: req.flash('msg')});
+            } catch {
+                // Internal Server Error
+                res.render('error-500');
+            }   
 });
 
 // Get Add Room Page
 router.get('/rooms/add-room', async (req, res) => {   
-    res.render('hospital/add-room');    
+            //Find all rooms
+            const rooms = await Room.find({});
+
+            // No. of rooms
+            const len = rooms.length;
+
+            res.render('hospital/rooms/add-room', {roomID: len+1});    
 });
 
-// Get Edit Room Page
-router.get('/rooms/edit-room', async (req, res) => {
-  
-    res.render('hospital/edit-room');
-    
-});
 
-// Get Edit Room Page
-router.get('/rooms/allot-room', async (req, res) => {
-  
-    res.render('hospital/allot-room');
-    
-});
+// Add room 
+router.post('/add-room', async (req, res) => {
+        try{
+            const rooms = await Room.find({});
 
-//Edit Room
-router.patch('/rooms/:id', async (req, res) => {
-    const updates = Object.keys(req.body);
-    const allowedUpdates = ['type', 'details', 'status', 'patientID', 'patientName', 'attendentName', 'allotedFrom'];
-                            
-    const isValidOperation = updates.every( (update) => 
-                            allowedUpdates.includes(update));
-
-    if (!isValidOperation) {
-        return res.status(400).send({error: 'Invalid Updates!'});
-    }
-    // const {wardName, bedCapacity, wardStatus} = req.body;
-    try {
-            const doc = await room.findByIdAndUpdate(req.params.id, req.body, {new: true, runValidators: true}); 
-
-           await doc.save(); 
-           res.send(doc);
+            // Already existing rooms count for generating Room ID
+            const len = rooms.length;
+                        
+            const newRoom = new Room({
+                                        id: len+1, 
+                                        details: req.body.details, 
+                                    });
+           // Save new Room to DB
+            await newRoom.save();
             
-    }  catch (e) {
-        //Internal Server Error
-        res.status(400).send(e);
-    }
+            req.flash('msg', `Room no. ${newRoom.id} added successfully`);
+            //Redirect to rooms list       
+            res.redirect('/hospital/rooms');
+        } catch {
+            // Internal Server Error
+            res.render('error-500');
+        }
+}); 
+
+// Get room by ID to Allot
+router.get('/rooms/allot-room/:id', async (req, res) => {
+            try{
+                // Find room by ID
+                const room = await Room.findById(req.params.id);
+
+                // Not Found
+                if(!room) {
+                    return res.render('error-404');
+                }
+
+                // Find all patients
+                const patients = await Patient.find({});
+
+                res.render('hospital/rooms/allot-room', {
+                                                        _id: room._id,
+                                                        roomID: room.id,
+                                                        patients
+                                                        });  
+            } catch {
+                //Internal Server Error
+                res.render('error-500');
+            }           
+});
+
+//Allot room 
+router.patch('/rooms/:id', async (req, res) => {
+    console.log(req.body);
+            try{
+                     // Get Room by Room ID
+                     const room = await Room.findOneAndUpdate({_id: req.params.id}, {
+                                                                status: "occupied", 
+                                                                patient: req.body.patient,
+                                                                attendentName: req.body.attendentName,
+                                                                allotedFrom: req.body.allotedFrom
+                                                                }, 
+                                                                {new: true, runValidators: true}
+                                                            );
+                    //Redirect to rooms
+                    req.flash('msg', `Room no. ${room.id} allotted successfully`);
+                    res.redirect('/hospital/rooms');
+
+            } catch (e) {
+                console.log(e);
+            }
 });
 
 
 // Delete Room by id
 router.delete('/rooms/:id', async (req, res) => {
-    try { 
-            // Get num (id) of room being deleted
-            const doc = await room.findById(req.params.id);
-            if (!doc)
-                {
-                    // Not Found
-                    return res.status(404).send();
-                }
-            const docNum = doc.id;
-           
-            // Delete Account
-            await room.findByIdAndDelete(req.params.id);                
+            try { 
+                    // Get Room by ID
+                    const room = await Room.findById(req.params.id);
+        
+                    //Not Found
+                    if (!room)  {
+                                return res.render('error-400');
+                        }
 
-            // Decrement nums(id) by one of all rooms below deleted room
-            await room.updateMany({"id" : {$gt: docNum}}, {$inc: {id: -1}});
-            
-            // Status 410 = Deleted
-            res.status(410).send();
-        } catch (e) {
-        res.status(400).send(e);
-    }
-});
+                    // Assign id of doctor, to be deleted, to Num
+                    const Num = room.id;
+                
+                    // Delete Account
+                    await Room.findByIdAndDelete(req.params.id);                
 
-// Delete All Rooms
-router.delete('/rooms', async (req, res) => {
-    try {
-        const doc = await room.deleteMany();     
-        // if db is empty
-        if (doc.deletedCount == 0)
-        {
-               // Not Found
-            return res.status(404).send();
-        }
-        // Gone 
-        res.status(410).send('All Deleted');
-    } catch(e) {
-        res.status(500).send(e); 
-    } 
-});
+                    // Decrement nums(id) by one of all rooms below deleted room
+                    await Room.updateMany({"id" : {$gt: Num}}, {$inc: {id: -1}});
+                    
+                    // Redirect to all rooms
+                    req.flash('msg', "Room deleted successfully");
+                    res.redirect('/hospital/rooms');
 
-// Get Rooms that are free (status === "free")
-router.get('/allot-room', async (req, res) => {
-        try {
-                   const freeRooms = await room.find({status: "free"});
-                   res.send(freeRooms);
-        } catch (e) {
-            res.status(500).send(e);
-        }
-});
-
-// Allot Room to patient (TO BE DONE)
-router.post('/allot-room', async (req, res) => {
-            try{    
-                    // Get Room by Room ID
-                    const Room = await room.findOneAndUpdate({id: req.body.id}, {
-                                                            status: "occupied", 
-                                                            patientName: req.body.patientName,
-                                                            attendentName: req.body.attendentName,
-                                                            allotedFrom: req.body.allotedFrom
-                                                            }, 
-                                                            {new: true, runValidators: true});
-                res.send("Room Alloted");
-               } catch (e) {
-                // Not Found
-                res.status(404).send(e);
+                } catch (e) {
+                   // Internal Server Error
+                        res.render('error-500');
             }
 });
 
@@ -584,8 +566,9 @@ router.delete('/rooms/:id', async (req, res) => {
 
 // Delete All Rooms
 router.delete('/rooms', async (req, res) => {
+    console.log("called");
     try {
-        const doc = await room.deleteMany();     
+        const doc = await Room.deleteMany();     
         // if db is empty
         if (doc.deletedCount == 0)
         {
