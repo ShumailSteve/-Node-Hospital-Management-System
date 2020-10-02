@@ -1,18 +1,36 @@
 const express = require('express');
 const router = new express.Router();
-const bcrypt = require('bcryptjs');
 
-const admin = require('../models/admin');
+const Admin = require('../models/admin');
 
-//Get Login Page
-router.get('/login', (req, res) => {
-    res.render('admins/login');
+
+//Get admins list
+router.get('', async (req, res) => {
+    try{
+            const admins = await Admin.find({});
+            const len = admins.length;
+
+            if (!len) {
+                      return res.status(404).send("No");
+            }
+            res.send(admins);
+    } catch (e) {
+            res.status(404).send();
+    }
 });
 
-//Get Register Page
+
+//Register Admin
 router.get('/register', (req, res) => {
     res.render('admins/register');
 });
+
+
+//Admin Login Page
+router.get('/login', (req, res) => {
+         res.render('admins/login', {info_msg: req.flash('msg')});
+});
+
 
 //Get Forget-pass Page
 router.get('/forgot-password', (req, res) => {
@@ -27,69 +45,69 @@ router.get('/change-password', (req, res) => {
 
 
 
-//Get admins list
-router.get('/', async (req, res) => {
-    try{
-            const admins = await admin.find({});
-            const len = admins.length;
-
-            if (!len) {
-                      return res.status(404).send();
-            }
-            res.send(admins);
-    } catch (e) {
-            res.status(404).send();
-    }
-});
-
 // Add admin
 router.post('/register', async (req, res) => {
-    try{     
-         // Obj Destructuring            
-        const {username, email, password, password2, phone} = req.body;
-        if(password != password2){
-            return res.status(400).send("Pass mismatch");
-        }
-        //Hash Pass before saving to db
-        const hashedPass = await bcrypt.hash(password, 8);
-        const newAdmin = new admin({username, email, password: hashedPass, phone});        
-        await newAdmin.save();
-        // Created
-        res.status(201).send();
-} catch (e) {
-        // Bad request
-        res.status(400).send(e);
-}
+            try{     
+              // Obj Destructuring            
+                const {username, email, password1, password2, phone} = req.body;
+              
+                let errors = [];
+                // If any required field in empty
+                if(!username || !email || !password1 || !password2 || !phone) {
+                    errors.push({msg: 'Please fill all required fields'});
+                    return res.render('admins/register', { errors, username, email, phone});
+                }
+
+                // If password and confirm password does not match
+                if(password1 != password2) {
+                    errors.push({msg: 'Password does not match'});
+                    return res.render('admins/register', { errors, username, email, phone});
+                }
+
+                //Create new admin
+                const newAdmin = new Admin({username, email, password: password1, phone});
+                
+                //Save admin to db
+                await newAdmin.save();
+
+                // Redirect to admin login page 
+                req.flash('msg', "Registered Successlly, you can now login");
+                res.redirect('/admin/login');
+                } 
+                
+                catch (e) {
+                    // If email to register already exists in db
+                    if(e.keyValue.email) {
+                        res.render('admins/register', {info_msg: `${e.keyValue.email} already exists`})
+                        return;
+                    }
+                        // Internal Server Error
+                        res.render('error-500');
+                }
 });
 
 // Admin Login
 router.post('/login', async (req, res) => {
-        try{
-               
-                var doc;
-                if(req.body.email)
-                {
-                   doc =  await admin.findOne({email: req.body.email});
-                }
-                else {
-                     doc =  await admin.findOne({username: req.body.username});  
-                }
+            // Object destructuring
+            const {email, password} = req.body;
+            let errors = [];
+
+            if(!email || !password) {
+                errors.push({msg: "Please fill all required fields"});
+                return res.render('admins/login', {errors})
+            }
+            try{
+                    const user = await Admin.findByCredentials(email, password);
+                    console.log(user);
                 
-            if (!doc)  {
-                    //status 404 = Not Found
-                return res.status(404).send("email doesn't exists");
+            } catch (e) {
+                console.log(e);
+                res.render('admins/login', {info_msg: e})
+                return;
+                // // Bad Request
+                // res.status(400).send(e);
             }
-            const isMatch = await bcrypt.compare(req.body.password, doc.password);
-            // If pass doesn't match
-            if(!isMatch){
-                return res.status(400).send("Incorrect Pass");
-            }
-           res.send(doc.username);
-        } catch (e) {
-            // Bad Request
-            res.status(400).send(e);
-        }
-     
+        
     });
     
 

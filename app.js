@@ -42,8 +42,6 @@ const departmentsRouter = require('./src/routes/departments');
 const employeesRouter = require('./src/routes/employees');
 const adminRouter = require("./src/routes/admins");
 const hospitalRouter = require("./src/routes/hospital");
-const accountsRouter = require("./src/routes/accounts");
-
 
 // Define Paths for Express Config.
 const publicDirectoryPath = path.join(__dirname, './public')
@@ -91,10 +89,8 @@ app.use('/patients', patientsRouter);
 app.use('/appointments', appointmentsRouter);
 app.use('/departments', departmentsRouter);
 app.use('/employees', employeesRouter);
-app.use('/admins', adminRouter);
+app.use('/admin', adminRouter);
 app.use('/hospital', hospitalRouter);
-app.use('/accounts', accountsRouter);
-
 
 app.get('/test', (req, res) => {
     res.render('test');
