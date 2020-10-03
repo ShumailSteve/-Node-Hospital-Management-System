@@ -4,6 +4,12 @@ const Ward = require('../models/ward');
 const Room = require('../models/room');
 const Patient = require('../models/patients');
 
+const auth = require('../middleware/auth');
+
+// Authenticate all routes 
+router.all("*", auth);
+
+
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
     // if _method exists then set req.method 
@@ -332,7 +338,7 @@ router.get('/rooms', async (req, res) => {
 
                 //If No Room
                 if (!len) {
-                    res.render('hospital/rooms/rooms', {info_msg: "No rooms available"});
+                    return res.render('hospital/rooms/rooms', {info_msg: "No rooms available"});
                 }
 
                 res.render('hospital/rooms/rooms', {rooms, info_msg: req.flash('msg')});

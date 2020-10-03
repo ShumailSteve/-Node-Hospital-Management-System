@@ -1,12 +1,13 @@
 const express = require('express');
 const router = new express.Router();
+const auth = require('../middleware/auth');
 
 //Get Requests
-router.get('', (req, res) => {
+router.get('', auth, (req, res) => {
     res.render('index');
 });
 
-router.get('/index', (req, res) => {
+router.get('/index', auth, (req, res) => {
         res.render('index');
 });
 

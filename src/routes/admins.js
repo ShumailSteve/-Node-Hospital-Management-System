@@ -3,6 +3,8 @@ const router = new express.Router();
 
 const Admin = require('../models/admin');
 
+const auth = require('../middleware/auth');
+
 
 //Get admins list
 router.get('', async (req, res) => {
@@ -94,21 +96,45 @@ router.post('/login', async (req, res) => {
 
             if(!email || !password) {
                 errors.push({msg: "Please fill all required fields"});
-                return res.render('admins/login', {errors})
+                // return res.render('admins/login', {errors})
+                return res.send("NOT")
             }
             try{
                     const user = await Admin.findByCredentials(email, password);
-                    console.log(user);
+                    const token = await user.generateAuthToken();
+
+                    // Save token as a cookie in browser
+                    res.cookie('token', token, {
+                        expires: new Date(Date.now() + 300000),
+                        secure: false, // set to true if your using https
+                        httpOnly: true,
+                      });
+                      res.redirect('/index');
                 
             } catch (e) {
-                console.log(e);
                 res.render('admins/login', {info_msg: e})
                 return;
-                // // Bad Request
-                // res.status(400).send(e);
             }
-        
+ });
+
+ //logout user
+router.get('/logout', auth, async (req,res) => {
+        console.log("logout");
+        console.log(req.user);
+            try{
+                    // Delete the current token 
+                    req.user.tokens = req.user.tokens.filter( (token) => {
+                        return token.token != req.token;
+                    });
+
+                    await req.user.save();
+                    res.redirect('/index');
+
+            } catch (e) {
+                    console.log(e);
+            }
     });
+        
     
 
 

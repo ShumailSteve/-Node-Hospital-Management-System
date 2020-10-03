@@ -6,6 +6,11 @@ const doctor = require('../models/doctor');
 const department = require('../models/department');
 const multer = require('multer');
 
+const auth = require('../middleware/auth');
+
+// Authenticate all routes 
+router.all("*", auth);
+
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
    // if _method exists then set req.method 
@@ -60,8 +65,8 @@ router.get('/add-doctor', async (req, res) => {
 });
 
 //Get all Doctors 
-router.get('', async (req, res) => {
-        // If query request
+router.get('', async (req, res) => { 
+     // If query request
         let query = searchQuery(req);
         const url = "/doctors";
         try{

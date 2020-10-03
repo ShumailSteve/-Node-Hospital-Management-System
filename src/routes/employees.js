@@ -4,6 +4,12 @@ const router = new express.Router();
 //Employee Model
 const Employee = require('../models/employee');
 
+const auth = require('../middleware/auth');
+
+// Authenticate all routes 
+router.all("*", auth);
+
+
 // FOR DELETING USING href
 router.use( function( req, res, next ) {
     // if _method exists then set req.method 

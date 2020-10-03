@@ -8,6 +8,7 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('connect-flash');
 const methodOverride = require('method-override');
+const cookieParser = require('cookie-parser');
 
 const app = express();
 app.use(methodOverride('_method'));
@@ -21,6 +22,8 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
 }))
+
+app.use(cookieParser());
 
 //Enable Flash Middleware
 app.use(flash());
@@ -81,7 +84,6 @@ hbs.registerHelper('if_includes', function(arr, val, opts) {
     }        
 });
 
-
 // Add Routers 
 app.use('', indexRouter);
 app.use('/doctors', doctorsRouter);
@@ -91,6 +93,8 @@ app.use('/departments', departmentsRouter);
 app.use('/employees', employeesRouter);
 app.use('/admin', adminRouter);
 app.use('/hospital', hospitalRouter);
+
+
 
 app.get('/test', (req, res) => {
     res.render('test');
