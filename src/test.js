@@ -1,11 +1,16 @@
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 
-const token = jwt.sign({ _id: 'abc123' }, 'thisismynewcourse', { expiresIn:
-    '7 days' })
+// const token = jwt.sign({ _id: 'abc123' }, 'thisismynewcourse', { expiresIn:
+//     '7 days' })
 
-    console.log({token});
+//     console.log({token});
 
 
-    const data = jwt.verify(token, 'thisismynewcourse')
-    console.log({data});
-    // data._id contains the user id of the user that owns this token
+//     const data = jwt.verify(token, 'thisismynewcourse')
+//     console.log({data});
+
+const bcrypt = require('bcryptjs')
+
+bcrypt.compare('$2a$08$0Xze.R8ClxbmZp9qKvWzPe.GKx.2PnemnquDUBdqUp1D9dFaHtvbO', "1234567").then( (doc) => {
+    console.log(doc);
+})

@@ -3,8 +3,8 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
 var adminSchema = mongoose.Schema({
-     username : {type: String, required: true, trim: true},
-     email : {type: String, required: true, lowercase: true, unique: true, trim: true},
+     username : {type: String,  required: true, trim: true},
+     email : {type: String, unique: true, required: true, lowercase: true,  trim: true},
      password : {type: String, required: true},
      phone : {type: String, required: true},
      tokens: [ {
@@ -24,6 +24,7 @@ adminSchema.pre('save', async function (next) {
      next()
 });
 
+
 // Generate Authenication token 
 // Methods adds instance method to documents
 adminSchema.methods.generateAuthToken = async function() {
@@ -34,6 +35,20 @@ adminSchema.methods.generateAuthToken = async function() {
           await user.save();
           
           return token;
+}
+
+// Hide Private Data by overriding toJSON() method
+adminSchema.methods.toJSON = function () {
+     const user = this;
+
+     // Convert user to object
+     const userObject = user.toObject();
+
+     //delete private data to limit data send to client
+     delete userObject.password;
+     delete userObject.tokens;
+
+     return userObject;
 }
 
 // Find admin by credentials (email and pass)
@@ -48,7 +63,7 @@ adminSchema.statics.findByCredentials = async (email, password) => {
           const isMatch = await bcrypt.compare(password, user.password);
 
           if(!isMatch) {
-               throw new Error("Wrong password, unable to login")
+               throw new Error("Wrong password");
           }
 
           return user;

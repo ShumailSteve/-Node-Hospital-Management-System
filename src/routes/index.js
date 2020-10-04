@@ -8,7 +8,7 @@ router.get('', auth, (req, res) => {
 });
 
 router.get('/index', auth, (req, res) => {
-        res.render('index');
+        res.render('index', {username: req.user.username});
 });
 
 module.exports = router;

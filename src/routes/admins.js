@@ -5,21 +5,20 @@ const Admin = require('../models/admin');
 
 const auth = require('../middleware/auth');
 
+// //Get admins list
+// router.get('', async (req, res) => {
+//     try{
+//             const admins = await Admin.find({});
+//             const len = admins.length;
 
-//Get admins list
-router.get('', async (req, res) => {
-    try{
-            const admins = await Admin.find({});
-            const len = admins.length;
-
-            if (!len) {
-                      return res.status(404).send("No");
-            }
-            res.send(admins);
-    } catch (e) {
-            res.status(404).send();
-    }
-});
+//             if (!len) {
+//                       return res.status(404).send("No");
+//             }
+//             res.send(admins);
+//     } catch (e) {
+//             res.status(404).send();
+//     }
+// });
 
 
 //Register Admin
@@ -40,12 +39,9 @@ router.get('/forgot-password', (req, res) => {
 });
 
 //Get Change-pass Page
-router.get('/change-password', (req, res) => {
-    res.render('admins/change-password');
+router.get('/change-password', auth, (req, res) => {
+      res.render('admins/change-password');
 });
-
-
-
 
 // Add admin
 router.post('/register', async (req, res) => {
@@ -109,7 +105,8 @@ router.post('/login', async (req, res) => {
                         secure: false, // set to true if your using https
                         httpOnly: true,
                       });
-                      res.redirect('/index');
+        
+                    res.redirect('/index');
                 
             } catch (e) {
                 res.render('admins/login', {info_msg: e})
@@ -117,25 +114,48 @@ router.post('/login', async (req, res) => {
             }
  });
 
+ //Change password
+router.patch('/change-password', auth, async (req, res) => {
+            // Obj Destructuring
+            const { oldPassword, password1, password2 } = req.body;
+            // const user = req.user;
+            try{
+                const user = await Admin.findByCredentials(req.user.email, oldPassword);
+                
+                //if new passwords does not match
+                if(password1 != password2) {
+                    res.render('admins/change-password', {info_msg: "New password and Confirm password doesn't match"});
+                    return;
+                }
+
+                //Update Pass
+                user.password = password1;
+                user.save();
+
+                // Logout to login with new password
+                req.flash('msg', "Password update successfully");
+                res.redirect('/admin/logout')
+  
+            }
+            catch (e) {
+                    res.render('admins/change-password', {info_msg: "Please enter correct old password"});
+            }
+});
+
  //logout user
 router.get('/logout', auth, async (req,res) => {
-        console.log("logout");
-        console.log(req.user);
             try{
-                    // Delete the current token 
+                    // Delete the current token from admin tokens
                     req.user.tokens = req.user.tokens.filter( (token) => {
                         return token.token != req.token;
-                    });
-
+                    }); 
+ 
                     await req.user.save();
                     res.redirect('/index');
 
-            } catch (e) {
-                    console.log(e);
+            } catch {
+                    res.redirect('/index');
             }
     });
         
-    
-
-
 module.exports = router;

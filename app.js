@@ -16,9 +16,11 @@ app.use(methodOverride('_method'));
 // Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))
 
+
 // Express Session Middleware
 app.use(session({
     secret: 'secret',
+    cookie: { maxAge: 60000 },
     resave: true,
     saveUninitialized: true,
 }))
@@ -50,8 +52,6 @@ const hospitalRouter = require("./src/routes/hospital");
 const publicDirectoryPath = path.join(__dirname, './public')
 const viewsPath = path.join(__dirname, './public/templates/views');
 const partialsPath = path.join(__dirname, './public/templates/partials');
-// const assetsPath = path.join(__dirname, './public/assets');
-
 
 // Set up Static Directory Path
 app.use(express.static(publicDirectoryPath));
