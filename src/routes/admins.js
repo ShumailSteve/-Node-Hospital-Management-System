@@ -150,6 +150,7 @@ router.get('/logout', auth, async (req,res) => {
                         return token.token != req.token;
                     }); 
  
+                    // Save to update user's tokens
                     await req.user.save();
                     res.redirect('/index');
 

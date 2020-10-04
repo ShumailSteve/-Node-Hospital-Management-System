@@ -25,12 +25,14 @@ adminSchema.pre('save', async function (next) {
 });
 
 
-// Generate Authenication token 
-// Methods adds instance method to documents
+// Generate Authenication token (methods adds instance method to documents)
 adminSchema.methods.generateAuthToken = async function() {
           const user = this;
-          const token = jwt.sign({ _id: user._id.toString() }, 'thisisHMS');
+
+          // Generate new token that expires after 2 days
+          const token = jwt.sign({ _id: user._id.toString() }, 'thisisHMS', {expiresIn: "2 days" });
           
+          // Concatenate generated token 
           user.tokens = user.tokens.concat({token});
           await user.save();
           

@@ -16,7 +16,6 @@ app.use(methodOverride('_method'));
 // Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }))
 
-
 // Express Session Middleware
 app.use(session({
     secret: 'secret',
