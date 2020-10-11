@@ -1,8 +1,11 @@
+require('dotenv').config(); // For accessing environment variables
 const express = require('express');
 const router = new express.Router();
 
+const nodemailer = require("nodemailer");
+
 const appointment = require('../models/appointment');
-const patient = require('../models/patients');
+const patientModel = require('../models/patients');
 const doctorModel =  require('../models/doctor');
 const department = require('../models/department');
 const getDate = require("../functions/getDate");
@@ -48,7 +51,7 @@ router.get('/',  async (req, res) => {
 
 // Get Add Appointment Page
 router.get('/add-appointment',  async(req, res) => {
-            const patients = await patient.find({status: "active"});
+            const patients = await patientModel.find({status: "active"});
             const appointments = await appointment.find({});
             const departments = await department.find({status: "active"});
             const len = appointments.length + 1;
@@ -60,7 +63,7 @@ router.get('/add-appointment',  async(req, res) => {
 // Get Edit Appointment Page
 router.get('/edit-appointment/:id',  async(req, res) => {
             let errors = [];
-            const patients = await patient.find({});
+            const patients = await patientModel.find({});
             const departments = await department.find({});
             const appt = await appointment.findById(req.params.id)
                                 .populate('patient', 'id firstName lastName')
@@ -70,20 +73,6 @@ router.get('/edit-appointment/:id',  async(req, res) => {
             errors.push({msg: req.flash('msg')});
             res.render('appointments/edit-appointment', { appointment: appt, patients, departments, doctors, errors});
 });
-
-// Get by ID
-// router.get('/:id',  async(req, res) => {
-//     try {
-//          const app = await appointment.findById(req.params.id);
-//             if (!app) {
-//              return res.status(404).send();
-//          }
-//          res.send(app);
-//     } catch (e) {
-//         res.status(400).send();
-//     }
-// });
-
 
 //Add appointment
 router.post('/add-appointment', async (req, res) => {
@@ -136,8 +125,27 @@ router.post('/add-appointment', async (req, res) => {
         
             try {
                 await newAppointment.save();
+                const Patient = await patientModel.findById(patient);
+                console.log(Patient);
+
+                // Generate msg to send
+                const output = `
+                            <h3>HMS Appointment Details</h3>
+                            <div>
+                                Patient Name: ${Patient.firstName} ${Patient.lastName} <br>
+                                Doctor Name:  ${Doctor.firstName} ${Doctor.lastName} <br>
+                                Appointment Date: ${newAppointment.appointmentDate} <br>
+                                Appointment Time: ${newAppointment.appointmentTime} <br>
+                                <em> Looking forward to see you soon :) </em>
+                            </div>  `;
+
+                 // Send Appointment Details to patient           
+                sendMailFunction(output).
+                        then( () => console.log("Sent") ).
+                        catch (e => console.log(e)) ;
+                
                 res.redirect('/appointments');
-            }  catch (e) {
+            }  catch {
                     // Internal Server Error
                     res.render('error-500');
             } 
@@ -259,6 +267,26 @@ function getAppointmentDay (appointmentDate) {
     // Convert dayInt to dayString
     var dayString = weekdays[dayInt];
      return dayString;
+}
+
+function sendMailFunction (output) {
+        let transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                    user: process.env.EMAIL, 
+                    pass: process.env.PASSWORD, 
+                }
+            });
+                        
+        let mailOptions = {
+            from: '<sender_mail>', // sender address
+            to: "<receiver_mail>", // list of receivers
+            subject: "HMS Appointment Details", // Subject line
+            html: output // html body
+        }
+
+        return transporter.sendMail(mailOptions);
+
 }
 
 module.exports = router;

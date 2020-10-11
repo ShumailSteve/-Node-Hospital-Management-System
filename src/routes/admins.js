@@ -92,8 +92,7 @@ router.post('/login', async (req, res) => {
 
             if(!email || !password) {
                 errors.push({msg: "Please fill all required fields"});
-                // return res.render('admins/login', {errors})
-                return res.send("NOT")
+                return res.render('admins/login', {errors});                
             }
             try{
                     const user = await Admin.findByCredentials(email, password);
@@ -101,7 +100,8 @@ router.post('/login', async (req, res) => {
 
                     // Save token as a cookie in browser
                     res.cookie('token', token, {
-                        expires: new Date(Date.now() + 300000),
+                        // Expires in 2 hrs (in milliseconds)
+                        expires: new Date(Date.now() + 7200000000),
                         secure: false, // set to true if your using https
                         httpOnly: true,
                       });
