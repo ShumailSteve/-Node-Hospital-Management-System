@@ -5,6 +5,7 @@ const Room = require('../models/room');
 const Patient = require('../models/patients');
 
 const auth = require('../middleware/auth');
+const room = require('../models/room');
 
 // Authenticate all routes 
 router.all("*", auth);
@@ -432,6 +433,31 @@ router.patch('/rooms/:id', async (req, res) => {
 });
 
 
+
+// Deallocated Room
+router.post('/deallocate-room/:id', async (req, res) => {
+                try{    
+                // Get Room by id
+                const Room = await room.findById(req.params.id);                
+
+                // If room to deallocate is occupied 
+                if (Room.status == "occupied") {
+                    // Deallocate room
+                        Room.status = "free";
+                        Room.patient= null;
+                        Room.allotedFrom = null;
+                    
+                        await Room.save()
+                        req.flash('msg', `Room No. ${Room.id} deallocated successfully`);
+                }
+                res.redirect(`/hospital/rooms`);               
+                
+            } catch {
+            // If room not found
+            res.render('error-404');
+        } 
+});
+
 // Delete Room by id
 router.delete('/rooms/:id', async (req, res) => {
             try { 
@@ -461,5 +487,6 @@ router.delete('/rooms/:id', async (req, res) => {
                         res.render('error-500');
             }
 });
+
 
 module.exports = router;

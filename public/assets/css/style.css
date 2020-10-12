@@ -481,7 +481,8 @@ table.table td h2 span {
 }
 .btn-success {
 	background-color: #55ce63;
-	border: 1px solid #55ce63
+	border: 1px solid #55ce63;
+	min-width: 90px;
 }
 .btn-success:hover,
 .btn-success:focus,

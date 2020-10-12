@@ -15,7 +15,7 @@ $(document).ready(function() {
 			backgroundColor: 'rgba(255, 188, 53, 0.5)',
 			borderColor: 'rgba(255, 188, 53, 1)',
 			borderWidth: 1,
-			data: [28, 48, 40, 19, 86, 27, 90]
+			data: [20, 48, 40, 19, 86, 27, 90]
 		}]
 	};
 

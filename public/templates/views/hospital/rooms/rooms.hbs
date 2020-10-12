@@ -60,12 +60,12 @@
                                             <div class="row" style="display: flex; justify-content: space-around">
                                             {{#if_eq status "free"}}
                                              <form action="/hospital/rooms/allot-room/{{_id}}" method="GET"> 
-                                                          <button class="btn status-green btn-sm"  type="submit">Allot</button>
+                                                          <button class="btn btn-success btn-sm"  type="submit">Allot</button>
                                             </form> 
                                             {{/if_eq}}
                                         
                                             {{#if_eq status "occupied"}}
-                                            <form action="/hospital/deallocate-bed/{{_id}}/{{bedID}}" method="POST"> 
+                                            <form action="/hospital/deallocate-room/{{_id}}" method="POST"> 
                                                           <button class="btn btn-primary btn-sm"  type="submit">Deallocate</button>
                                             </form> 
                                              {{/if_eq}}

@@ -22,7 +22,7 @@
                         <div class="dash-widget">
 							<span class="dash-widget-bg1"><i class="fa fa-stethoscope" aria-hidden="true"></i></span>
 							<div class="dash-widget-info text-right">
-								<h3>98</h3>
+								<h3>{{no_of_Doctors}}</h3>
 								<span class="widget-title1">Doctors <i class="fa fa-check" aria-hidden="true"></i></span>
 							</div>
                         </div>
@@ -31,26 +31,26 @@
                         <div class="dash-widget">
                             <span class="dash-widget-bg2"><i class="fa fa-user-o"></i></span>
                             <div class="dash-widget-info text-right">
-                                <h3>1072</h3>
+                                <h3>{{no_of_Patients}}</h3>
                                 <span class="widget-title2">Patients <i class="fa fa-check" aria-hidden="true"></i></span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
                         <div class="dash-widget">
-                            <span class="dash-widget-bg3"><i class="fa fa-user-md" aria-hidden="true"></i></span>
+                            <span class="dash-widget-bg3"><i class="fa fa-hospital-o" aria-hidden="true"></i></span>
                             <div class="dash-widget-info text-right">
-                                <h3>72</h3>
-                                <span class="widget-title3">Attend <i class="fa fa-check" aria-hidden="true"></i></span>
+                                <h3>{{no_of_Rooms}}</h3>
+                                <span class="widget-title3">Rooms <i class="fa fa-check" aria-hidden="true"></i></span>
                             </div>
                         </div>
                     </div>
                     <div class="col-md-6 col-sm-6 col-lg-6 col-xl-3">
                         <div class="dash-widget">
-                            <span class="dash-widget-bg4"><i class="fa fa-heartbeat" aria-hidden="true"></i></span>
+                            <span class="dash-widget-bg4"><i class="fa fa-ward" aria-hidden="true"></i></span>
                             <div class="dash-widget-info text-right">
-                                <h3>618</h3>
-                                <span class="widget-title4">Pending <i class="fa fa-check" aria-hidden="true"></i></span>
+                                <h3>{{no_of_Beds}}</h3>
+                                <span class="widget-title4">Beds <i class="fa fa-check" aria-hidden="true"></i></span>
                             </div>
                         </div>
                     </div>
@@ -200,72 +200,19 @@
 							</div>
                             <div class="card-body">
                                 <ul class="contact-list">
+								{{#each Doctors}}
                                     <li>
                                         <div class="contact-cont">
                                             <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="John Doe"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status online"></span></a>
+                                                <a href="/doctors/profile/{{_id}}" title="{{firstName}} {{lastName}}"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status online"></span></a>
                                             </div>
                                             <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">John Doe</span>
+                                                <span class="contact-name text-ellipsis">{{firstName}} {{lastName}}</span>
                                                 <span class="contact-date">MBBS, MD</span>
                                             </div>
                                         </div>
                                     </li>
-                                    <li>
-                                        <div class="contact-cont">
-                                            <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="Richard Miles"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status offline"></span></a>
-                                            </div>
-                                            <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">Richard Miles</span>
-                                                <span class="contact-date">MD</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="contact-cont">
-                                            <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="John Doe"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status away"></span></a>
-                                            </div>
-                                            <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">John Doe</span>
-                                                <span class="contact-date">BMBS</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="contact-cont">
-                                            <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="Richard Miles"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status online"></span></a>
-                                            </div>
-                                            <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">Richard Miles</span>
-                                                <span class="contact-date">MS, MD</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="contact-cont">
-                                            <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="John Doe"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status offline"></span></a>
-                                            </div>
-                                            <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">John Doe</span>
-                                                <span class="contact-date">MBBS</span>
-                                            </div>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div class="contact-cont">
-                                            <div class="float-left user-img m-r-10">
-                                                <a href="profile.html" title="Richard Miles"><img src="assets/img/user.jpg" alt="" class="w-40 rounded-circle"><span class="status away"></span></a>
-                                            </div>
-                                            <div class="contact-info">
-                                                <span class="contact-name text-ellipsis">Richard Miles</span>
-                                                <span class="contact-date">MBBS, MD</span>
-                                            </div>
-                                        </div>
-                                    </li>
+                                {{/each}}
                                 </ul>
                             </div>
                             <div class="card-footer text-center bg-white">
