@@ -1,49 +1,50 @@
 $(document).ready(function() {
 	
-	// Bar Chart
+// LINE CHART
 
-	var barChartData = {
-		labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-		datasets: [{
-			label: 'Dataset 1',
-			backgroundColor: 'rgba(0, 158, 251, 0.5)',
-			borderColor: 'rgba(0, 158, 251, 1)',
-			borderWidth: 1,
-			data: [35, 59, 80, 81, 56, 55, 40]
-		}, {
-			label: 'Dataset 2',
-			backgroundColor: 'rgba(255, 188, 53, 0.5)',
-			borderColor: 'rgba(255, 188, 53, 1)',
-			borderWidth: 1,
-			data: [20, 48, 40, 19, 86, 27, 90]
-		}]
+getMonthsDataAndBuildLineChart(); 
+
+// BAR CHART
+getMonthsDataAndBuildBarChart();
+
+// Fetch data and build line chart (Patients per month)
+ function getMonthsDataAndBuildLineChart () {
+                  
+                    fetch('/patients/perMonth').then( (doc) => {
+                        doc.json().then ( 
+                                        (arr) => {                                      
+										var newData = arr.data;
+										                                        
+										 buildLineChart(newData);
+                                })
+                        });   
 	};
 
-	var ctx = document.getElementById('bargraph').getContext('2d');
-	window.myBar = new Chart(ctx, {
-		type: 'bar',
-		data: barChartData,
-		options: {
-			responsive: true,
-			legend: {
-				display: false,
-			}
-		}
-	});
+// Fetch data and build bar chart (Patients per month as per disease)
+function getMonthsDataAndBuildBarChart () {
+                  
+		fetch('/patients/diseasePerMonth').then( (doc) => {
+			doc.json().then ( 
+							(arr) => {                                      
+							var feverData = arr.data[0];
+							var cancerData = arr.data[1];
+							var heartData = arr.data[2];
+														
+							 buildBarChart(feverData, cancerData, heartData);
+					})
+			});   
+};
 
-	// Line Chart
 
+
+// Build line chart				
+function buildLineChart(monthsData) {
 	var lineChartData = {
 		labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
 		datasets: [{
-			label: "My First dataset",
+			label: "Patients",
 			backgroundColor: "rgba(0, 158, 251, 0.5)",
-			data: [100, 70, 20, 100, 120, 50, 70, 50, 50, 100, 50, 90]
-		}, {
-		label: "My Second dataset",
-		backgroundColor: "rgba(255, 188, 53, 0.5)",
-		fill: true,
-		data: [28, 48, 40, 19, 86, 27, 20, 90, 50, 20, 90, 20]
+			data: monthsData
 		}]
 	};
 	
@@ -59,12 +60,68 @@ $(document).ready(function() {
 			tooltips: {
 				mode: 'index',
 				intersect: false,
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						suggestedMin: 0,
+						suggestedMax: 10
+					}
+				}]
 			}
 		}
 	});
+}
 	
-	// Bar Chart 2
-	
+// BAR CHART
+// Build Bar chart				
+function buildBarChart(feverData, cancerData, heartData) {
+	var barChartData = {
+
+		labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+		datasets: [{
+			label: 'Fever',
+			backgroundColor: 'rgba(0, 158, 251, 0.7)',
+			borderColor: 'rgba(0, 158, 251, 1)',
+			borderWidth: 1,
+			data: feverData
+		}
+		, {
+			label: 'Cancer',
+			backgroundColor: 'rgba(255, 0, 0, 0.7)',
+			borderColor: 'rgba(255, 188, 53, 1)',
+			borderWidth: 1,
+			data: cancerData
+		},
+		{
+			label: 'Heart',
+			backgroundColor: 'rgba(255, 188, 53, 0.7)',
+			borderColor: 'rgba(255, 188, 53, 1)',
+			borderWidth: 1,
+			data: heartData
+		}]
+	};
+
+	var ctx = document.getElementById('bargraph').getContext('2d');
+	window.myBar = new Chart(ctx, {
+		type: 'bar',
+		data: barChartData,
+		options: {
+			responsive: true,
+			legend: {
+				display: false,
+			},
+			scales: {
+				yAxes: [{
+					ticks: {
+						suggestedMin: 0,
+						suggestedMax: 10
+					}
+				}]
+			}
+		}
+	});
+}
     barChart();
     
     $(window).resize(function(){

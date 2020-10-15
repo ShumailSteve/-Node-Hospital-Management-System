@@ -1,41 +1,108 @@
-{{!-- <!DOCTYPE html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
-<script>
-$(function() {
-    $( "#datepicker" ).datepicker(
-    {
-        beforeShowDay: function(d) {
-            var day = d.getDay();
-            return [(day != 0 && day != 3)];
-        }
-    });
-  });
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+       
+      
+        
+
+    </script>
 </head>
 <body>
-<input type="text" id="datepicker">
-</body>
-</html> --}}
-<html>
-    <head>
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/smoothness/jquery-ui.css" />
-<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
- <script>
+    <h1 id="test1">TEST</h1>
+    <div style="width: 1000px; height: 100px;">
+        <canvas id="myChart"></canvas>
+    </div>
+    <h1 id="test2">TEST</h1>
 
+    
+<script src="https://cdn.jsdelivr.net/npm/chart.js@2.8.0"></script>
+
+<script>
+             /*   var test= [10,20];
+                    fetch('/patients/perMonth').then( (doc) => {
+                        doc.json().then ( 
+                                        (arr) => {
+                                            var newData = arr.data;
+                                            /* for (i=0; i<arr.data.length; i++ ) {
+                                                newData.push(arr.data[i]);
+                                            } 
+                                         console.log(newData);
+                                         console.log(test);
+                                        
+                                         document.getElementById('test1').innerHTML = newData;
+                                         BuildChart(newData);
+                                })
+                        }) 
+            
+             document.getElementById('test2').innerHTML = newData;
+
+             */
+              
+getMonthsDataAndBuildChart(); 
+ function getMonthsDataAndBuildChart () {
+                  
+                    fetch('/patients/perMonth').then( (doc) => {
+                        doc.json().then ( 
+                                        (arr) => {
+                                      
+                                        var newData = arr.data;
+                                         document.getElementById('test1').innerHTML = newData;
+                                         BuildChart(newData);
+                                })
+                        });   
+                }
+        
+
+function BuildChart(monthsData) {
+
+var ctx = document.getElementById('myChart').getContext('2d');
+
+var data = {
+        labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        datasets: [{
+            label: '# of Votes',
+            data: monthsData,
+            backgroundColor: [
+                'rgba(255, 99, 132, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 99, 132, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)'
+            ],
+            borderWidth: 1
+        }]
+    }
+ 
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: data,
+    options: {
+        scales: {
+            yAxes: [{
+                ticks: {
+                    beginAtZero: true
+                }
+            }]
+        }
+    }
+});
+}
 </script>
-    </head>
+    
 
-    <body>
-        <div class="wrapper">
-  <input type="text" name="date" id="date" onclick="setDate()">  
-</div>
-    <script src="/assets/js/test.js"></script>
-    </body>
+    
+</body>
 </html>
-
-

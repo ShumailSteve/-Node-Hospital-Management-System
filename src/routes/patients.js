@@ -60,6 +60,25 @@ router.get('/profile/:id', async (req, res) => {
   
 });
 
+//Get Num of Patients per month 
+router.get('/perMonth', async (req, res) => {
+            const Patients = await patient.find({});
+
+            // patientsPerMonth return array of nums 
+            const data = patientsPerMonth(Patients);
+            res.send({data});
+});
+
+//Get Num of Patients per month as per disease
+router.get('/diseasePerMonth', async (req, res) => {
+    const Patients = await patient.find({});
+
+    // patientsPerMonth return array of nums 
+    const data = patientsDiseasePerMonth(Patients);
+    
+    res.send({data});
+});
+
 //ADD Patients Page
 router.get('/add-patient', (req, res) => {
     res.render('patients/add-patient');
@@ -209,4 +228,58 @@ router.delete('/', (req, res) => {
         } 
         return query;
  }
+
+ // Return array containing num of patients per month
+ function patientsPerMonth (Patients) {
+        
+        // 0 filled Array of num of patient per months 
+        let data = new Array(12).fill(0);
+            
+        // Find admit month of each patient and inc respective month by 1
+        Patients.forEach ((doc) => {
+            const monthIndex = new Date(doc.admitDate).getMonth();
+            data[monthIndex]++;
+        });
+
+        return data;
+ };
+
+  // Return array containing num of patients per month as per disease
+  function patientsDiseasePerMonth (Patients) {
+        
+    // 0 filled Array of major diseases Patients per month
+    let feverData = new Array(12).fill(0);
+    let cancerData = new Array(12).fill(0);
+    let heartData = new Array(12).fill(0);
+   
+        
+    // Find admit month of each patient and inc respective month by 1
+    Patients.forEach ((doc) => {
+
+        // Get month index to access array positions
+        const monthIndex = new Date(doc.admitDate).getMonth();
+
+        // if fever patient inc by 1 of respective month
+        if(doc.disease == "Fever")
+        {
+            feverData[monthIndex]++;
+        }
+
+         // if cancer patient inc by 1 of respective month
+        if(doc.disease == "Cancer")
+        {
+            cancerData[monthIndex]++;
+        }
+
+         // if heart patient inc by 1 of respective month
+         if(doc.disease == "heart")
+         {
+             heartData[monthIndex]++;
+         }
+        
+    });
+
+    return [feverData, cancerData, heartData];
+};
+
 module.exports = router;

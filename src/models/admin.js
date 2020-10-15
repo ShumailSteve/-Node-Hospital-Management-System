@@ -1,3 +1,5 @@
+require('dotenv').config(); // For accessing environment variables
+
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -29,8 +31,8 @@ adminSchema.pre('save', async function (next) {
 adminSchema.methods.generateAuthToken = async function() {
           const user = this;
 
-          // Generate new token that expires after 2 days
-          const token = jwt.sign({ _id: user._id.toString() }, 'thisisHMS', {expiresIn: "2 days" });
+          // Generate new token with SECRET_KEY that expires after 8 hrs 
+          const token = jwt.sign({ _id: user._id.toString() }, "thisisHMS", {expiresIn: "8h" });
           
           // Concatenate generated token 
           user.tokens = user.tokens.concat({token});

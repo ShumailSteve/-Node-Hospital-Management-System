@@ -11,7 +11,7 @@ var patientSchema = mongoose.Schema({
                 type: String,
                 enum: ["male", "female"] 
             },
-    disease : {type: String, trim: true },
+    disease : {type: String, trim: true, lowercase: true },
     bloodGroup: {type: String},
     address:   {type: String},     
     city:      {type: String},    
