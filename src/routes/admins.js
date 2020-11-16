@@ -101,7 +101,7 @@ router.post('/login', async (req, res) => {
                     // Save token as a cookie in browser
                     res.cookie('token', token, {
                         // Expires in 8 hrs 
-                        expires: new Date(Date.now() + 8* 60 *60*60),
+                        expires: new Date(Date.now() + 8 * 60 * 60 * 60),
                         secure: false, // set to true if your using https
                         httpOnly: true,
                       });
